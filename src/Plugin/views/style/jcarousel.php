@@ -1,14 +1,12 @@
 <?php
+
 /**
- * Created by PhpStorm.
- * User: niko
- * Date: 14.10.15
- * Time: 12:37
+ * @file
+ * Contains \Drupal\jcarousel\Plugin\views\style\jcarousel.
  */
 
 namespace Drupal\jcarousel\Plugin\views\style;
 
-use Drupal\jcarousel;
 use Drupal\jcarousel\jCarouselSkinsManager;
 use Drupal\views\Plugin\views\style;
 use Drupal\Core\Form\FormStateInterface;
@@ -57,16 +55,22 @@ class jcarousel extends style\StylePluginBase {
   }
 
   /**
-   * Wraps the breakpoint manager.
+   * Wraps the skins manager.
    *
-   * @return \Drupal\breakpoint\BreakpointManagerInterface
+   * @return \Drupal\jcarousel\jCarouselSkinsManager
    */
-//  protected function skinsManager() {
-//    return \Drupal::service('jcarousel.skins.manager');
-//  }
+  protected function skinsManager() {
+    return \Drupal::service('jcarousel.skins.manager');
+  }
 
+  /**
+   * Returns keyed array of jCarousel skins.
+   * 
+   * @return array
+   *   Keys array of skins
+   */
   public function getSkins(){
-    return new jCarouselSkinsManager()->CarouselSkinsManager::skins('skins');
+    return $this->skinsManager()->getDefinitions();
   }
 
   /**
@@ -77,10 +81,10 @@ class jcarousel extends style\StylePluginBase {
 
     // Build the list of skins as options.
     $skins = $this->getSkins();
-    foreach (jcarousel_skins() as $key => $skin) {
-      $skins[$key] = $skin['title'];
+    foreach ($skins as $key => $skin) {
+      $skins[$key] = $skin['label'];
     }
-    $skins[''] = t('None');
+    $skins[''] = $this->t('None');
 
     // Number of options to provide in count-based options.
     $start_range = range(-10, 10);
