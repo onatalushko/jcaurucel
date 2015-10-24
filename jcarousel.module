@@ -274,7 +274,7 @@ function jcarousel_add($class_name = NULL, $options = array(), $add = TRUE) {
  *   Keyed array of skins.
  */
 function jcarousel_skins() {
-  return $this->skinsManager()->getDefinitions();
+  return \Drupal::service('jcarousel.skins.manager')->getDefinitions();
 }
 
 /**
