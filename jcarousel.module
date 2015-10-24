@@ -15,15 +15,15 @@ use \Drupal\Component\Utility\Html;
 function jcarousel_help($route_name, RouteMatchInterface $route_match) {
   switch ($route_name) {
     case 'help.page.jcarousel':
-//      $fieldset = array(
-//        '#type' => 'fieldset',
-//        '#title' => t('View sample code'),
-//        '#description' => t('The following HTML may be printed out to the page through a node, block, or in a custom template. Then the following PHP code must be run to add the jCarousel library and CSS to the page.'),
-//        '#collapsible' => TRUE,
-//        '#collapsed' => TRUE,
+      $fieldset = array(
+        '#type' => 'fieldset',
+        '#title' => t('View sample code'),
+        '#description' => t('The following HTML may be printed out to the page through a node, block, or in a custom template. Then the following PHP code must be run to add the jCarousel library and CSS to the page.'),
+        '#collapsible' => TRUE,
+        '#collapsed' => TRUE,
 //        '#attached' => array('js' => array('misc/collapse.js', 'misc/form.js')),
-//        '#attributes' => array('class' => array('collapsible', 'collapsed')),
-//      );
+        '#attributes' => array('class' => array('collapsible', 'collapsed')),
+      );
 
       $output = '';
 
@@ -167,24 +167,6 @@ function jcarousel_theme() {
     ),
   );
 }
-
-///**
-// * Implements hook_jcarousel_skin_info().
-// */
-//function jcarousel_jcarousel_skin_info() {
-//  $skins = array();
-//
-//  $skins['default'] = array(
-//    'title' => t('Default'),
-//    'file' => 'skins/default/jcarousel-default.css',
-//  );
-//  $skins['tango'] = array(
-//    'title' => t('Tango'),
-//    'file' => 'skins/tango/jcarousel-tango.css',
-//  );
-//
-//  return $skins;
-//}
 
 /**
  * Adds all the necessary CSS and JS necessary for building a carousel.

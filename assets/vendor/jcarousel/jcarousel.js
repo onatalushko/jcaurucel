@@ -226,7 +226,7 @@
     /*
      Prev control initialization
      */
-    $('.jcarousel-control-prev')
+    $('.jcarousel-prev')
       .on('jcarouselcontrol:active', function() {
         $(this).removeClass('inactive');
       })
@@ -241,7 +241,7 @@
     /*
      Next control initialization
      */
-    $('.jcarousel-control-next')
+    $('.jcarousel-next')
       .on('jcarouselcontrol:active', function() {
         $(this).removeClass('inactive');
       })
@@ -398,7 +398,7 @@
 
   Drupal.theme.jCarouselButton = function (type) {
     // Use links for buttons for accessibility.
-    return '<a href="#" class="jcarousel-control-' + type + '"></a>';
+    return '<a href="#" class="jcarousel-' + type + '"></a>';
   };
 
   Drupal.theme.jCarouselPageLink = function (pageNumber) {
