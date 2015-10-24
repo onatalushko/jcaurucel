@@ -1,0 +1,5 @@
+name: jCarousel
+type: module
+description: Create jQuery-based carousel rotators.
+package: User interface
+core: 8.x

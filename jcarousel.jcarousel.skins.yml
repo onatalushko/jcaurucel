@@ -1,0 +1,7 @@
+default:
+  name: 'Default'
+  file: assets/vendor/jcarousel/skins/default/jcarousel-default.css
+
+tango:
+  name: 'Tango'
+  file: assets/vendor/jcarousel/skins/tango/jcarousel-tango.css
