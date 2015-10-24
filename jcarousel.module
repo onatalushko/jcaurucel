@@ -28,17 +28,19 @@ function jcarousel_help($route_name, RouteMatchInterface $route_match) {
       $output .= '<h2>' . t('Views integration') . '</h2>';
       $output .= '<p>';
       $output .= t('Most configuration options for the jCarousel module are provided through <a href=":views">Views module</a>.', [
-        ':views' => \Drupal::moduleHandler()->moduleExists('views') ? \Drupal::url('help.page', ['name' => 'views']) : '#']
-        );
+          ':views' => \Drupal::moduleHandler()
+            ->moduleExists('views') ? \Drupal::url('help.page', ['name' => 'views']) : '#'
+        ]
+      );
       if (\Drupal::moduleHandler()->moduleExists('views_ui')) {
         $output .= ' ' . t('You may configure a new view through the <a href=":views-url">Views module interface</a>. After adding a new view, change its "Display style" to "jCarousel" and configure the remaining options there. When using the jCarousel display style with Views, you can construct any of the examples on this page as well as dynamically loaded carousels through AJAX requests.', [
-          ':views-url' => \Drupal::url('entity.view.collection'),
-        ]);
+            ':views-url' => \Drupal::url('entity.view.collection'),
+          ]);
       }
       elseif (\Drupal::moduleHandler()->moduleExists('views')) {
         $output .= ' ' . t('This site not have Views (or the Views UI module) installed currently. You may be able to turn on this module under your site\'s <a href="!modules-url">module page</a>, or you may have to <a href=":module">download Views module</a> and install it.', [
-          ':modules-url' => \Drupal::url('system.modules_list'),
-        ]);
+            ':modules-url' => \Drupal::url('system.modules_list'),
+          ]);
       }
       $output .= '</p>';
 
@@ -82,8 +84,8 @@ function jcarousel_help($route_name, RouteMatchInterface $route_match) {
       // Provide the vertical carousel demonstration.
       $output .= '<h3>' . t('Vertical carousel') . '</h3>';
       $output .= '<p>' . t('jCarousel can accept a variety of <a href=":url">configuration options</a> via the second argument to <code>jcarousel_add()</code>. In this example, we created a vertical carousel.', [
-        ':url' => 'http://sorgalla.com/projects/jcarousel/#Configuration',
-      ]) . '</p>';
+          ':url' => 'http://sorgalla.com/projects/jcarousel/#Configuration',
+        ]) . '</p>';
       $list_html = '<ul class="verticalcarousel jcarousel-skin-default">' . $list . '</ul>';
 
       $sample = $details;
@@ -103,7 +105,7 @@ function jcarousel_help($route_name, RouteMatchInterface $route_match) {
       // Provide the different skins carousel demonstration.
       $output .= '<h3>' . t('Different skins') . '</h3>';
       $list_html = '<ul class="differentskin jcarousel-skin-tango">' . $list . '</ul>';
-      $output .= '<p>' . t('The "skin" of a carousel can be changed by setting the <code>$options[\'skin\']</code> property. This skin must match one of the skins either provided by a module or matching a skin included in your theme\'s style.css file. Skins are simply a class given to the HTML list with the name "jcarousel-skin-[skin-name]". A custom skin path may be specified in <code>$options[\'skin path\']</code>, or you can use one of these module-based skins:') . theme('item_list', ['items' => array_keys(jcarousel_skins())]) . t('Note that with skins you will often need to override certain CSS styles in your theme\'s style.css file. Certain properties (like the height and width of individual items and the carousel itself) must be manually specified directly in CSS. Not using a skin at all by specifying <code>$options[\'skin\'] = NULL</code> and then styling the entire carousel in style.css is also a good approach.') . '</p>';
+//      $output .= '<p>' . t('The "skin" of a carousel can be changed by setting the <code>$options[\'skin\']</code> property. This skin must match one of the skins either provided by a module or matching a skin included in your theme\'s style.css file. Skins are simply a class given to the HTML list with the name "jcarousel-skin-[skin-name]". A custom skin path may be specified in <code>$options[\'skin path\']</code>, or you can use one of these module-based skins:') . theme('item_list', ['items' => array_keys(jcarousel_skins())]) . t('Note that with skins you will often need to override certain CSS styles in your theme\'s style.css file. Certain properties (like the height and width of individual items and the carousel itself) must be manually specified directly in CSS. Not using a skin at all by specifying <code>$options[\'skin\'] = NULL</code> and then styling the entire carousel in style.css is also a good approach.') . '</p>';
 
       $sample = $details;
       $sample['sample'] = [
@@ -121,7 +123,7 @@ function jcarousel_help($route_name, RouteMatchInterface $route_match) {
 
       // Another thing you can do is use the theme('jcarousel') function.
       $output .= '<h3>' . t('Theme function') . '</h3>';
-      $output .= '<p>' . t('The <code>theme(\'jcarousel\')</code> function allows you to easily create the markup and add all the JavaScript to the page in one function call. Like <code>jcarousel_add()</code> the theme function approach can also take options. In this example we create the carousel with the button next event being called when the mouse rolls over the buttons.') . '</p>';
+//      $output .= '<p>' . t('The <code>theme(\'jcarousel\')</code> function allows you to easily create the markup and add all the JavaScript to the page in one function call. Like <code>jcarousel_add()</code> the theme function approach can also take options. In this example we create the carousel with the button next event being called when the mouse rolls over the buttons.') . '</p>';
       $items = [
         '<img src="http://static.flickr.com/66/199481236_dc98b5abb3_s.jpg" width="75" height="75" alt="" />',
         '<img src="http://static.flickr.com/75/199481072_b4a0d09597_s.jpg" width="75" height="75" alt="" />',
@@ -200,7 +202,7 @@ function jcarousel_help($route_name, RouteMatchInterface $route_match) {
  * Implementation of hook_init().
  */
 //function jcarousel_init() {
-  // Global JS settings required for all carousels.
+// Global JS settings required for all carousels.
 //  drupal_add_js(array('jcarousel' => array('ajaxPath' => url('jcarousel/ajax/views'))), 'setting');
 //}
 
@@ -215,7 +217,7 @@ function jcarousel_theme() {
         'options' => [],
         'identifier' => NULL,
       ],
-      'function' => 'theme_jcarousel',
+//      'function' => 'theme_jcarousel',
     ],
   ];
 }
@@ -300,34 +302,34 @@ function jcarousel_skins() {
  *   automatically. Note that this is not the "id" attribute on the HTML list,
  *   instead it is one of the classes added to the UL tag.
  */
-function theme_jcarousel($variables) {
-  $items = $variables['items'];
-  $options = $variables['options'];
-  $identifier = $variables['identifier'];
-  static $unique;
-
-  if (!isset($identifier)) {
-    $unique = isset($unique) ? $unique + 1 : 1;
-    $identifier = 'jcarousel-id-' . $unique;
-  }
-
-  $options['skin'] = array_key_exists('skin', $options) ? $options['skin'] : 'default';
-  jcarousel_add($identifier, $options);
-
-  $classes = 'jcarousel ' . $identifier;
-  if (!empty($options['skin'])) {
-    $classes .= ' jcarousel-skin-' . $options['skin'];
-  }
-
-  $output = '<ul class="' . $classes . '">';
-  if (is_array($items)) {
-    foreach ($items as $item) {
-      $output .= '<li>' . $item . '</li>';
-    }
-  }
-  $output .= '</ul>';
-  return $output;
-}
+//function theme_jcarousel($variables) {
+//  $items = $variables['items'];
+//  $options = $variables['options'];
+//  $identifier = $variables['identifier'];
+//  static $unique;
+//
+//  if (!isset($identifier)) {
+//    $unique = isset($unique) ? $unique + 1 : 1;
+//    $identifier = 'jcarousel-id-' . $unique;
+//  }
+//
+//  $options['skin'] = array_key_exists('skin', $options) ? $options['skin'] : 'default';
+//  jcarousel_add($identifier, $options);
+//
+//  $classes = 'jcarousel ' . $identifier;
+//  if (!empty($options['skin'])) {
+//    $classes .= ' jcarousel-skin-' . $options['skin'];
+//  }
+//
+//  $output = '<ul class="' . $classes . '">';
+//  if (is_array($items)) {
+//    foreach ($items as $item) {
+//      $output .= '<li>' . $item . '</li>';
+//    }
+//  }
+//  $output .= '</ul>';
+//  return $output;
+//}
 
 /**
  * Implements hook_library_info_alter().

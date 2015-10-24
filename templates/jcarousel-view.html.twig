@@ -12,15 +12,24 @@
  * @ingroup themeable
  */
 #}
+{#{{ dump(options) }}#}
 <div class="jcarousel-wrapper">
   <div{{ attributes }}>
-    <ul>
-      {% for row in rows %}
-        <li>
+    {% if options.navigation == 'before' %}
+      <a{{ attributes_previous }}  href="#"></a>
+      <a{{ attributes_next }} href="#"></a>
+    {% endif %}
+    <ul{{ content_attributes }}>
+      {% for key,row in rows %}
+        <li{{ row_attributes[key] }}>
           {{ row }}
         </li>
       {% endfor %}
     </ul>
+    {% if options.navigation == 'after' %}
+      <a{{ attributes_previous }}  href="#"></a>
+      <a{{ attributes_next }} href="#"></a>
+    {% endif %}
   </div>
 </div>
 

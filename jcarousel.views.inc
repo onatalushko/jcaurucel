@@ -6,6 +6,7 @@
  */
 
 use \Drupal\Component\Utility\Html;
+use Drupal\Core\Template\Attribute;
 use \Drupal\views\ViewExecutable;
 use \Drupal\Core\Url;
 use Drupal\Component\Utility\NestedArray;
@@ -200,15 +201,53 @@ function template_preprocess_jcarousel_view(&$variables) {
   $variables['attributes']['class'][] = 'jcarousel';
   $variables['attributes']['class'][] = Html::cleanCssIdentifier('jcarousel-view--' . $view->storage->id() . '--' . $display_id);
   $variables['attributes']['class'][] = Html::cleanCssIdentifier('jcarousel-dom-' . $settings[$key]['view_options']['jcarousel_dom_id']);
-
+  $variables['attributes']['data-jcarousel'][] = 'true';
+  if ($options['wrap']) {
+    $variables['attributes']['data-wrap'][] = $options['wrap'];
+  }
   if (!empty($options['skin'])) {
     $variables['attributes']['class'][] = 'jcarousel-skin-' . $options['skin'];
   }
+  $variables['options'] = $options;
+
+  $scroll = !empty($options['scroll']) ? $options['scroll'] : 1;
+  $orientation = !empty($options['vertical']) && $options['vertical'] ? 'vertical' : 'horizontal';
+
+  $variables['attributes_previous'] = new Attribute();
+  $variables['attributes_previous']['data-jcarousel-control'] = 'true';
+  $variables['attributes_prevFious']['data-target'] = '-=' . $scroll;
+  $variables['attributes_previous']['class'] = [
+    'jcarousel-prev',
+    'jcarousel-prev-' . $orientation,
+  ];
+
+  $variables['attributes_next'] = new Attribute();
+  $variables['attributes_next']['data-jcarousel-control'] = 'true';
+  $variables['attributes_next']['data-target'] = '+=' . $scroll;
+  $variables['attributes_next']['class'] = [
+    'jcarousel-next',
+    'jcarousel-next-' . $orientation,
+  ];
+
+  $variables['content_attributes'] = new Attribute();
+  $variables['content_attributes']['class'] = [
+    'jcarousel-container-' . $orientation,
+  ];
+
+
 
   // Give each item a class to identify where in the carousel it belongs.
   foreach ($variables['rows'] as $id => $row) {
     $number = $id + 1 + $view->pager->getOffset();
     $zebra = ($number % 2 == 0) ? 'even' : 'odd';
-    $variables['row_classes'][$id] = 'jcarousel-item-' . $number . ' ' . $zebra;
+
+    $row_attribute = new Attribute();
+    $row_attribute['class'] = [
+      'jcarousel-item',
+      'jcarousel-item-' . $number,
+      'jcarousel-item-' . $orientation,
+      $zebra
+    ];
+    $variables['row_attributes'][$id] = $row_attribute;
   }
 }
