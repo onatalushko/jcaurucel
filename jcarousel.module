@@ -213,6 +213,9 @@ function jcarousel_add($class_name = NULL, $options = array(), $add = TRUE) {
       'skin' => 'default',
       'selector' => '.' . $class_name,
     );
+    if (!empty($options['skin'])) {
+      $attachments['library'][] = 'jcarousel/skin.' . $options['skin'];
+    }
 
     // Allow other modules to modify these settings.
     \Drupal::moduleHandler()->alter('jcarousel_options', $options, $class_name);
@@ -322,4 +325,25 @@ function theme_jcarousel($variables) {
   }
   $output .= '</ul>';
   return $output;
+}
+
+/**
+ * Implements hook_library_info_alter().
+ *
+ * Add skins as libraries.
+ */
+function jcarousel_library_info_alter(&$libraries, $extension) {
+  if ($extension == 'jcarousel') {
+    $skins = \Drupal::service('jcarousel.skins.manager')->getDefinitions();
+    foreach ($skins as $key => $data) {
+      $libraries["skin.$key"] = [
+        'version' => 'VERSION',
+        'css' => [
+          'theme' => [
+            $data['file'] => [],
+          ],
+        ],
+      ];
+    }
+  }
 }
