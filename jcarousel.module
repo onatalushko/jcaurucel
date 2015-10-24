@@ -21,6 +21,8 @@ function jcarousel_help($route_name, RouteMatchInterface $route_match) {
         '#description' => t('The following HTML may be printed out to the page through a node, block, or in a custom template. Then the following PHP code must be run to add the jCarousel library and CSS to the page.'),
       ];
 
+      $module_handler = \Drupal::moduleHandler();
+      $renderer = \Drupal::service('renderer');
       $output = '';
 
       $output .= '<p>' . t('The jCarousel module provides the ability to create carousel-style lists such as those included on this page. The jCarousel module includes integrations with other Drupal modules, but may also be used manually within your own theme or custom modules. It does not include any site-wide settings page or options, each carousel is separately configured.') . '</p>';
@@ -28,16 +30,14 @@ function jcarousel_help($route_name, RouteMatchInterface $route_match) {
       $output .= '<h2>' . t('Views integration') . '</h2>';
       $output .= '<p>';
       $output .= t('Most configuration options for the jCarousel module are provided through <a href=":views">Views module</a>.', [
-          ':views' => \Drupal::moduleHandler()
-            ->moduleExists('views') ? \Drupal::url('help.page', ['name' => 'views']) : '#'
-        ]
-      );
-      if (\Drupal::moduleHandler()->moduleExists('views_ui')) {
+        ':views' => $module_handler->moduleExists('views') ? \Drupal::url('help.page', ['name' => 'views']) : '#']
+        );
+      if ($module_handler->moduleExists('views_ui')) {
         $output .= ' ' . t('You may configure a new view through the <a href=":views-url">Views module interface</a>. After adding a new view, change its "Display style" to "jCarousel" and configure the remaining options there. When using the jCarousel display style with Views, you can construct any of the examples on this page as well as dynamically loaded carousels through AJAX requests.', [
             ':views-url' => \Drupal::url('entity.view.collection'),
           ]);
       }
-      elseif (\Drupal::moduleHandler()->moduleExists('views')) {
+      elseif ($module_handler->moduleExists('views')) {
         $output .= ' ' . t('This site not have Views (or the Views UI module) installed currently. You may be able to turn on this module under your site\'s <a href="!modules-url">module page</a>, or you may have to <a href=":module">download Views module</a> and install it.', [
             ':modules-url' => \Drupal::url('system.modules_list'),
           ]);
@@ -75,7 +75,7 @@ function jcarousel_help($route_name, RouteMatchInterface $route_match) {
           'php_code' => highlight_string("<?php jcarousel_add('horizontalcarousel'); ?>", TRUE),
         ]
       ];
-      $output .= drupal_render($sample);
+      $output .= $renderer->render($sample);
 
       $output .= $list_html;
       jcarousel_add('horizontalcarousel');
@@ -97,7 +97,7 @@ function jcarousel_help($route_name, RouteMatchInterface $route_match) {
           'php_code' => highlight_string("<?php jcarousel_add('verticalcarousel', ['vertical' => TRUE]); ?>", TRUE),
         ]
       ];
-      $output .= drupal_render($sample);
+      $output .= $renderer->render($sample);
 
       $output .= $list_html;
       jcarousel_add('verticalcarousel', ['vertical' => TRUE]);
@@ -105,7 +105,14 @@ function jcarousel_help($route_name, RouteMatchInterface $route_match) {
       // Provide the different skins carousel demonstration.
       $output .= '<h3>' . t('Different skins') . '</h3>';
       $list_html = '<ul class="differentskin jcarousel-skin-tango">' . $list . '</ul>';
-//      $output .= '<p>' . t('The "skin" of a carousel can be changed by setting the <code>$options[\'skin\']</code> property. This skin must match one of the skins either provided by a module or matching a skin included in your theme\'s style.css file. Skins are simply a class given to the HTML list with the name "jcarousel-skin-[skin-name]". A custom skin path may be specified in <code>$options[\'skin path\']</code>, or you can use one of these module-based skins:') . theme('item_list', ['items' => array_keys(jcarousel_skins())]) . t('Note that with skins you will often need to override certain CSS styles in your theme\'s style.css file. Certain properties (like the height and width of individual items and the carousel itself) must be manually specified directly in CSS. Not using a skin at all by specifying <code>$options[\'skin\'] = NULL</code> and then styling the entire carousel in style.css is also a good approach.') . '</p>';
+      $output .= '<p>' . t('The "skin" of a carousel can be changed by setting the <code>$options[\'skin\']</code> property. This skin must match one of the skins either provided by a module or matching a skin included in your theme\'s style.css file. Skins are simply a class given to the HTML list with the name "jcarousel-skin-[skin-name]". A custom skin path may be specified in <code>$options[\'skin path\']</code>, or you can use one of these module-based skins:');
+      $skins = jcarousel_skins();
+      $items = [
+        '#theme' => 'item_list',
+        '#items' => array_keys($skins),
+      ];
+      $output .= $renderer->render($items);
+      $output .= t('Note that with skins you will often need to override certain CSS styles in your theme\'s style.css file. Certain properties (like the height and width of individual items and the carousel itself) must be manually specified directly in CSS. Not using a skin at all by specifying <code>$options[\'skin\'] = NULL</code> and then styling the entire carousel in style.css is also a good approach.') . '</p>';
 
       $sample = $details;
       $sample['sample'] = [
@@ -116,7 +123,7 @@ function jcarousel_help($route_name, RouteMatchInterface $route_match) {
           'php_code' => highlight_string("<?php jcarousel_add('differentskin', ['skin' => 'tango']); ?>", TRUE),
         ]
       ];
-      $output .= drupal_render($sample);
+      $output .= $renderer->render($sample);
 
       $output .= $list_html;
       jcarousel_add('differentskin', ['skin' => 'tango']);
@@ -150,13 +157,13 @@ function jcarousel_help($route_name, RouteMatchInterface $route_match) {
           'php_code' => highlight_string("<?php\n\$items = " . var_export($items, TRUE) . ";\n\$options = " . var_export($options, TRUE) . ";\nprint theme('jcarousel', ['items' => \$items, 'options' => \$options]);\n?>", TRUE),
         ]
       ];
-      $output .= drupal_render($sample);
+      $output .= $renderer->render($sample);
       $example = [
         '#theme' => 'jcarousel',
         '#items' => $items,
         '#options' => $options,
       ];
-      $output .= drupal_render($example);
+      $output .= $renderer->render($example);
 
       // Provide a circular wrap element.
       $output .= '<h3>' . t('Circular wrap') . '</h3>';
@@ -173,13 +180,13 @@ function jcarousel_help($route_name, RouteMatchInterface $route_match) {
           'php_code' => highlight_string("<?php\n\$items = " . var_export($items, TRUE) . ";\n\$options = " . var_export($options, TRUE) . ";\nprint theme('jcarousel', ['items' => \$items, 'options' => \$options]);\n ", TRUE),
         ]
       ];
-      $output .= drupal_render($sample);
+      $output .= $renderer->render($sample);
       $example = [
         '#theme' => 'jcarousel',
         '#items' => $items,
         '#options' => $options,
       ];
-      $output .= drupal_render($example);
+      $output .= $renderer->render($example);
 
       return $output;
   }
