@@ -15,15 +15,11 @@ use \Drupal\Component\Utility\Html;
 function jcarousel_help($route_name, RouteMatchInterface $route_match) {
   switch ($route_name) {
     case 'help.page.jcarousel':
-      $fieldset = array(
-        '#type' => 'fieldset',
+      $details = [
+        '#type' => 'details',
         '#title' => t('View sample code'),
         '#description' => t('The following HTML may be printed out to the page through a node, block, or in a custom template. Then the following PHP code must be run to add the jCarousel library and CSS to the page.'),
-        '#collapsible' => TRUE,
-        '#collapsed' => TRUE,
-//        '#attached' => array('js' => array('misc/collapse.js', 'misc/form.js')),
-        '#attributes' => array('class' => array('collapsible', 'collapsed')),
-      );
+      ];
 
       $output = '';
 
@@ -31,12 +27,18 @@ function jcarousel_help($route_name, RouteMatchInterface $route_match) {
 
       $output .= '<h2>' . t('Views integration') . '</h2>';
       $output .= '<p>';
-      $output .= t('Most configuration options for the jCarousel module are provided through <a href="http://drupal.org/project/views">Views module</a>.');
-      if (Drupal::moduleHandler()->moduleExists('views_ui')) {
-        $output .= ' ' . t('You may configure a new view through the <a href="!views-url">Views module interface</a>. After adding a new view, change its "Display style" to "jCarousel" and configure the remaining options there. When using the jCarousel display style with Views, you can construct any of the examples on this page as well as dynamically loaded carousels through AJAX requests.', array('!views-url' => \Drupal::url('entity.view.collection')));
+      $output .= t('Most configuration options for the jCarousel module are provided through <a href=":views">Views module</a>.', [
+        ':views' => \Drupal::moduleHandler()->moduleExists('views') ? \Drupal::url('help.page', ['name' => 'views']) : '#']
+        );
+      if (\Drupal::moduleHandler()->moduleExists('views_ui')) {
+        $output .= ' ' . t('You may configure a new view through the <a href=":views-url">Views module interface</a>. After adding a new view, change its "Display style" to "jCarousel" and configure the remaining options there. When using the jCarousel display style with Views, you can construct any of the examples on this page as well as dynamically loaded carousels through AJAX requests.', [
+          ':views-url' => \Drupal::url('entity.view.collection'),
+        ]);
       }
-      else {
-        $output .= ' ' . t('This site not have Views (or the Views UI module) installed currently. You may be able to turn on this module under your site\'s <a href="!modules-url">module page</a>, or you may have to <a href="http://drupal.org/project/views">download Views module</a> and install it.', array('!modules-url' => url('admin/build/modules')));
+      elseif (\Drupal::moduleHandler()->moduleExists('views')) {
+        $output .= ' ' . t('This site not have Views (or the Views UI module) installed currently. You may be able to turn on this module under your site\'s <a href="!modules-url">module page</a>, or you may have to <a href=":module">download Views module</a> and install it.', [
+          ':modules-url' => \Drupal::url('system.modules_list'),
+        ]);
       }
       $output .= '</p>';
 
@@ -62,8 +64,15 @@ function jcarousel_help($route_name, RouteMatchInterface $route_match) {
       $output .= '<p>' . t('This example uses <code>jcarousel_add()</code> directly with no options to create the default horizontal carousel.') . '</p>';
       $list_html = '<ul class="horizontalcarousel jcarousel-skin-default">' . $list . '</ul>';
 
-      $sample = $fieldset;
-      $sample['#children'] = '<code><pre>' . Html::escape($list_html) . '</pre></code>' . highlight_string("<?php jcarousel_add('horizontalcarousel'); ?>", TRUE);
+      $sample = $details;
+      $sample['sample'] = [
+        '#type' => 'inline_template',
+        '#template' => '<code><pre>{{ list_html }}</pre></code> {{ php_code|raw }}',
+        '#context' => [
+          'list_html' => $list_html,
+          'php_code' => highlight_string("<?php jcarousel_add('horizontalcarousel'); ?>", TRUE),
+        ]
+      ];
       $output .= drupal_render($sample);
 
       $output .= $list_html;
@@ -72,32 +81,48 @@ function jcarousel_help($route_name, RouteMatchInterface $route_match) {
 
       // Provide the vertical carousel demonstration.
       $output .= '<h3>' . t('Vertical carousel') . '</h3>';
-      $output .= '<p>' . t('jCarousel can accept a variety of <a href="http://sorgalla.com/projects/jcarousel/#Configuration">configuration options</a> via the second argument to <code>jcarousel_add()</code>. In this example, we created a vertical carousel.') . '</p>';
+      $output .= '<p>' . t('jCarousel can accept a variety of <a href=":url">configuration options</a> via the second argument to <code>jcarousel_add()</code>. In this example, we created a vertical carousel.', [
+        ':url' => 'http://sorgalla.com/projects/jcarousel/#Configuration',
+      ]) . '</p>';
       $list_html = '<ul class="verticalcarousel jcarousel-skin-default">' . $list . '</ul>';
 
-      $sample = $fieldset;
-      $sample['#children'] = '<code><pre>' . Html::escape($list_html) . '</pre></code>' . highlight_string("<?php jcarousel_add('verticalcarousel', array('vertical' => TRUE)); ?>", TRUE);
+      $sample = $details;
+      $sample['sample'] = [
+        '#type' => 'inline_template',
+        '#template' => '<code><pre>{{ list_html }}</pre></code> {{ php_code|raw }}',
+        '#context' => [
+          'list_html' => $list_html,
+          'php_code' => highlight_string("<?php jcarousel_add('verticalcarousel', ['vertical' => TRUE]); ?>", TRUE),
+        ]
+      ];
       $output .= drupal_render($sample);
 
       $output .= $list_html;
-      jcarousel_add('verticalcarousel', array('vertical' => TRUE));
+      jcarousel_add('verticalcarousel', ['vertical' => TRUE]);
 
       // Provide the different skins carousel demonstration.
       $output .= '<h3>' . t('Different skins') . '</h3>';
       $list_html = '<ul class="differentskin jcarousel-skin-tango">' . $list . '</ul>';
-//      $output .= '<p>' . t('The "skin" of a carousel can be changed by setting the <code>$options[\'skin\']</code> property. This skin must match one of the skins either provided by a module or matching a skin included in your theme\'s style.css file. Skins are simply a class given to the HTML list with the name "jcarousel-skin-[skin-name]". A custom skin path may be specified in <code>$options[\'skin path\']</code>, or you can use one of these module-based skins:') . theme('item_list', array('items' => array_keys(jcarousel_skins()))) . t('Note that with skins you will often need to override certain CSS styles in your theme\'s style.css file. Certain properties (like the height and width of individual items and the carousel itself) must be manually specified directly in CSS. Not using a skin at all by specifying <code>$options[\'skin\'] = NULL</code> and then styling the entire carousel in style.css is also a good approach.') . '</p>';
+      $output .= '<p>' . t('The "skin" of a carousel can be changed by setting the <code>$options[\'skin\']</code> property. This skin must match one of the skins either provided by a module or matching a skin included in your theme\'s style.css file. Skins are simply a class given to the HTML list with the name "jcarousel-skin-[skin-name]". A custom skin path may be specified in <code>$options[\'skin path\']</code>, or you can use one of these module-based skins:') . theme('item_list', ['items' => array_keys(jcarousel_skins())]) . t('Note that with skins you will often need to override certain CSS styles in your theme\'s style.css file. Certain properties (like the height and width of individual items and the carousel itself) must be manually specified directly in CSS. Not using a skin at all by specifying <code>$options[\'skin\'] = NULL</code> and then styling the entire carousel in style.css is also a good approach.') . '</p>';
 
-      $sample = $fieldset;
-      $sample['#children'] = '<code><pre>' . Html::escape($list_html) . '</pre></code>' . highlight_string("<?php jcarousel_add('differentskin', array('skin' => 'tango')); ?>", TRUE);
+      $sample = $details;
+      $sample['sample'] = [
+        '#type' => 'inline_template',
+        '#template' => '<code><pre>{{ list_html }}</pre></code> {{ php_code|raw }}',
+        '#context' => [
+          'list_html' => $list_html,
+          'php_code' => highlight_string("<?php jcarousel_add('differentskin', ['skin' => 'tango']); ?>", TRUE),
+        ]
+      ];
       $output .= drupal_render($sample);
 
       $output .= $list_html;
-      jcarousel_add('differentskin', array('skin' => 'tango'));
+      jcarousel_add('differentskin', ['skin' => 'tango']);
 
       // Another thing you can do is use the theme('jcarousel') function.
       $output .= '<h3>' . t('Theme function') . '</h3>';
-//      $output .= '<p>' . t('The <code>theme(\'jcarousel\')</code> function allows you to easily create the markup and add all the JavaScript to the page in one function call. Like <code>jcarousel_add()</code> the theme function approach can also take options. In this example we create the carousel with the button next event being called when the mouse rolls over the buttons.') . '</p>';
-      $items = array(
+      $output .= '<p>' . t('The <code>theme(\'jcarousel\')</code> function allows you to easily create the markup and add all the JavaScript to the page in one function call. Like <code>jcarousel_add()</code> the theme function approach can also take options. In this example we create the carousel with the button next event being called when the mouse rolls over the buttons.') . '</p>';
+      $items = [
         '<img src="http://static.flickr.com/66/199481236_dc98b5abb3_s.jpg" width="75" height="75" alt="" />',
         '<img src="http://static.flickr.com/75/199481072_b4a0d09597_s.jpg" width="75" height="75" alt="" />',
         '<img src="http://static.flickr.com/57/199481087_33ae73a8de_s.jpg" width="75" height="75" alt="" />',
@@ -108,29 +133,51 @@ function jcarousel_help($route_name, RouteMatchInterface $route_match) {
         '<img src="http://static.flickr.com/69/199481255_fdfe885f87_s.jpg" width="75" height="75" alt="" />',
         '<img src="http://static.flickr.com/60/199480111_87d4cb3e38_s.jpg" width="75" height="75" alt="" />',
         '<img src="http://static.flickr.com/70/229228324_08223b70fa_s.jpg" width="75" height="75" alt="" />',
-      );
-      $options = array(
+      ];
+      $options = [
         'buttonNextEvent' => 'mouseover',
         'buttonPrevEvent' => 'mouseover',
-      );
-      $fieldset['#description'] = t('The following PHP code may be placed in a template file or a module to create a carousel.');
+      ];
+      $details['#description'] = t('The following PHP code may be placed in a template file or a module to create a carousel.');
 
-      $sample = $fieldset;
-      $sample['#children'] = highlight_string("<?php\n\$items = " . var_export($items, TRUE) . ";\n\$options = " . var_export($options, TRUE) . ";\nprint theme('jcarousel', array('items' => \$items, 'options' => \$options));\n?>", TRUE);
+      $sample = $details;
+      $sample['sample'] = [
+        '#type' => 'inline_template',
+        '#template' => '{{ php_code|raw }}',
+        '#context' => [
+          'php_code' => highlight_string("<?php\n\$items = " . var_export($items, TRUE) . ";\n\$options = " . var_export($options, TRUE) . ";\nprint theme('jcarousel', ['items' => \$items, 'options' => \$options]);\n?>", TRUE),
+        ]
+      ];
       $output .= drupal_render($sample);
-//      $output .= theme('jcarousel', array('items' => $items, 'options' => $options));
+      $example = [
+        '#theme' => 'jcarousel',
+        '#items' => $items,
+        '#options' => $options,
+      ];
+      $output .= drupal_render($example);
 
       // Provide a circular wrap element.
       $output .= '<h3>' . t('Circular wrap') . '</h3>';
       $output .= '<p>' . t('This example puts the carousel into a circular wrap.') . '</p>';
 
-      $options = array(
+      $options = [
         'wrap' => 'circular',
-      );
-      $sample = $fieldset;
-//      $sample['#children'] = highlight_string("<?php\n\$items = " . var_export($items, TRUE) . ";\n\$options = " . var_export($options, TRUE) . ";\nprint theme('jcarousel', array('items' => \$items, 'options' => \$options));\n ", TRUE);
+      ];
+      $sample = $details;
+      $sample['sample'] = [
+        '#type' => 'inline_template',
+        '#template' => '{{ php_code|raw }}',
+        '#context' => [
+          'php_code' => highlight_string("<?php\n\$items = " . var_export($items, TRUE) . ";\n\$options = " . var_export($options, TRUE) . ";\nprint theme('jcarousel', ['items' => \$items, 'options' => \$options]);\n ", TRUE),
+        ]
+      ];
       $output .= drupal_render($sample);
-//      $output .= render(array('jcarousel', array('items' => $items, 'options' => $options));
+      $example = [
+        '#theme' => 'jcarousel',
+        '#items' => $items,
+        '#options' => $options,
+      ];
+      $output .= drupal_render($example);
 
       return $output;
   }
@@ -161,11 +208,16 @@ function jcarousel_help($route_name, RouteMatchInterface $route_match) {
  * Implements hook_theme().
  */
 function jcarousel_theme() {
-  return array(
-    'jcarousel' => array(
-      'variables' => array('items' => NULL, 'options' => NULL, 'identifier' => NULL),
-    ),
-  );
+  return [
+    'jcarousel' => [
+      'variables' => [
+        'items' => [],
+        'options' => [],
+        'identifier' => NULL,
+      ],
+      'function' => 'theme_jcarousel',
+    ],
+  ];
 }
 
 /**
