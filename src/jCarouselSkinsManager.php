@@ -81,7 +81,7 @@ class jCarouselSkinsManager extends DefaultPluginManager implements jCarouselSki
     $this->moduleHandler = $module_handler;
     $this->themeHandler = $theme_handler;
     $this->setStringTranslation($string_translation);
-    $this->alterInfo('jcarousel.skins');
+    $this->alterInfo('jcarousel_skins');
     $this->setCacheBackend($cache_backend, 'jcarousel_skins', array('jcarousel_skins'));
   }
 
@@ -90,7 +90,7 @@ class jCarouselSkinsManager extends DefaultPluginManager implements jCarouselSki
    */
   protected function getDiscovery() {
     if (!isset($this->discovery)) {
-      $this->discovery = new YamlDiscovery('jcarousel.skins', $this->moduleHandler->getModuleDirectories() + $this->themeHandler->getThemeDirectories());
+      $this->discovery = new YamlDiscovery('jcarousel_skins', $this->moduleHandler->getModuleDirectories() + $this->themeHandler->getThemeDirectories());
       $this->discovery = new ContainerDerivativeDiscoveryDecorator($this->discovery);
     }
     return $this->discovery;

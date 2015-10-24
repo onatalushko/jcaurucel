@@ -8,6 +8,7 @@
 
 namespace Drupal\jcarousel\Plugin\views\style;
 
+use Drupal\jcarousel;
 use Drupal\jcarousel\jCarouselSkinsManager;
 use Drupal\views\Plugin\views\style;
 use Drupal\Core\Form\FormStateInterface;
@@ -60,12 +61,12 @@ class jcarousel extends style\StylePluginBase {
    *
    * @return \Drupal\breakpoint\BreakpointManagerInterface
    */
-  protected static function skinsManager() {
-    return \Drupal::service('jcarousel.skins.manager');
-  }
+//  protected function skinsManager() {
+//    return \Drupal::service('jcarousel.skins.manager');
+//  }
 
-  public static function getSkins(){
-    return skins('skins');
+  public function getSkins(){
+    return new jCarouselSkinsManager()->CarouselSkinsManager::skins('skins');
   }
 
   /**
