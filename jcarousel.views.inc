@@ -197,15 +197,14 @@ function template_preprocess_jcarousel_view(&$variables) {
 
   // Build the list of classes for the carousel.
   $options = $view->getStyle()->options;
-  $variables['jcarousel_classes_array'] = array(
-    'jcarousel',
-    Html::cleanCssIdentifier('jcarousel-view--' . $view->storage->id() . '--' . $display_id),
-    Html::cleanCssIdentifier('jcarousel-dom-' . $settings[$key]['view_options']['jcarousel_dom_id']),
-  );
+  $variables['attributes']['class'][] = 'jcarousel';
+  $variables['attributes']['class'][] = Html::cleanCssIdentifier('jcarousel-view--' . $view->storage->id() . '--' . $display_id);
+  $variables['attributes']['class'][] = Html::cleanCssIdentifier('jcarousel-dom-' . $settings[$key]['view_options']['jcarousel_dom_id']);
+
   if (!empty($options['skin'])) {
-    $variables['jcarousel_classes_array'][] = 'jcarousel-skin-' . $options['skin'];
+    $variables['attributes']['class'][] = 'jcarousel-skin-' . $options['skin'];
   }
-  $variables['jcarousel_classes'] = implode(' ', $variables['jcarousel_classes_array']);
+//  $variables['jcarousel_classes'] = implode(' ', $variables['jcarousel_classes_array']);
 
   // Give each item a class to identify where in the carousel it belongs.
   foreach ($variables['rows'] as $id => $row) {
