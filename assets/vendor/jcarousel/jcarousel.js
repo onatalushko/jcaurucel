@@ -214,13 +214,13 @@
 
     console.log(position);
     if (position == 'before') {
-      $('.jcarousel-wrapper').prepend(Drupal.theme.jCarouselButton('prev'));
-      $('.jcarousel-wrapper').prepend(Drupal.theme.jCarouselButton('next'));
+      $('.jcarousel-wrapper > div').prepend(Drupal.theme.jCarouselButton('prev'));
+      $('.jcarousel-wrapper > div').prepend(Drupal.theme.jCarouselButton('next'));
       var navigation = $('<ul class="jcarousel-pagination"></ul>');
     }
     if (position == 'after') {
-      $('.jcarousel-wrapper').append(Drupal.theme.jCarouselButton('prev'));
-      $('.jcarousel-wrapper').append(Drupal.theme.jCarouselButton('next'));
+      $('.jcarousel-wrapper ul').append(Drupal.theme.jCarouselButton('prev'));
+      $('.jcarousel-wrapper ul').append(Drupal.theme.jCarouselButton('next'));
     }
 
     /*
