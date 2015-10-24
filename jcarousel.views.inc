@@ -204,7 +204,6 @@ function template_preprocess_jcarousel_view(&$variables) {
   if (!empty($options['skin'])) {
     $variables['attributes']['class'][] = 'jcarousel-skin-' . $options['skin'];
   }
-//  $variables['jcarousel_classes'] = implode(' ', $variables['jcarousel_classes_array']);
 
   // Give each item a class to identify where in the carousel it belongs.
   foreach ($variables['rows'] as $id => $row) {
