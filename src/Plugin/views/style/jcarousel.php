@@ -19,7 +19,7 @@ use Drupal\Core\Form\FormStateInterface;
  *   id = "jcarousel",
  *   title = @Translation("jCarousel"),
  *   help = @Translation("Displays rows in a jCarousel."),
- *   theme = "jcarousel",
+ *   theme = "jcarousel__views",
  *   display_types = {"normal"}
  * )
  */
@@ -37,19 +37,19 @@ class jcarousel extends style\StylePluginBase {
    */
   protected function defineOptions() {
     $options = parent::defineOptions();
-    $options['wrap'] = array('default' => NULL);
-    $options['skin'] = array('default' => 'default');
-    $options['visible'] = array('default' => NULL);
-    $options['responsive'] = array('default' => 0);
-    $options['scroll'] = array('default' => '');
-    $options['auto'] = array('default' => 0);
-    $options['autoPause'] = array('default' => '1');
-    $options['animation'] = array('default' => '');
-    $options['start'] = array('default' => '1');
-    $options['easing'] = array('default' => NULL);
-    $options['vertical'] = array('default' => FALSE);
-    $options['navigation'] = array('default' => '');
-    $options['ajax'] = array('default' => 0);
+    $options['wrap'] = ['default' => NULL];
+    $options['skin'] = ['default' => 'default'];
+    $options['visible'] = ['default' => NULL];
+    $options['responsive'] = ['default' => 0];
+    $options['scroll'] = ['default' => ''];
+    $options['auto'] = ['default' => 0];
+    $options['autoPause'] = ['default' => '1'];
+    $options['animation'] = ['default' => ''];
+    $options['start'] = ['default' => '1'];
+    $options['easing'] = ['default' => NULL];
+    $options['vertical'] = ['default' => FALSE];
+    $options['navigation'] = ['default' => ''];
+    $options['ajax'] = ['default' => 0];
     return $options;
   }
 
@@ -90,7 +90,7 @@ class jcarousel extends style\StylePluginBase {
     $range = array_combine($start_range, $start_range);
     // Remove '0'.
     unset($range[0]);
-    $auto_range = array('' => t('Auto')) + array_combine(range(1, 10), range(1, 10));
+    $auto_range = ['' => t('Auto')] + array_combine(range(1, 10), range(1, 10));
 
     $form['description'] = array(
       '#type' => 'markup',
@@ -218,5 +218,4 @@ class jcarousel extends style\StylePluginBase {
     }
     return $errors;
   }
-
 }

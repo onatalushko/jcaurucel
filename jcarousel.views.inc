@@ -97,19 +97,19 @@ function jcarousel_views_add(ViewExecutable $view, $display_id = NULL) {
   }
 
   // Save the settings for the carousel, these will be used by the JavaScript.
-  $options = array();
+  $options = [];
 
   // Keep track of each settings addition and give a unique ID. This can be
   // useful when displaying the same view multiple times with different
   // arguments (i.e. such as in a panel).
-  $options['view_options'] = array(
+  $options['view_options'] = [
     'view_args' => Html::escape(implode('/', $view->args)),
     'view_path' => $view->getPath(),
     'view_base_path' => Url::fromRoute('<current>')->toString(),
     'view_display_id' => $display_id,
     'view_name' => $view->storage->id(),
     'jcarousel_dom_id' => isset($view->jcarousel_dom_id) ? $view->jcarousel_dom_id : ++$dom_counter,
-  );
+  ];
 
   foreach ($view->getStyle()->options as $key => $option) {
     if ($option) {
@@ -180,4 +180,72 @@ function jcarousel_views_add(ViewExecutable $view, $display_id = NULL) {
 
   $identifier = Html::cleanCssIdentifier('jcarousel_dom_' . $options['view_options']['jcarousel_dom_id']);
   return jcarousel_add($identifier, $options);
+}
+
+/*
+ * Preprocess function for jcarousel.tpl.php.
+ */
+function jcarousel_preprocess_jcarousel__views(&$variables) {
+  $view = $variables['view'];
+  $display_id = empty($view->current_display) ? 'default' : $view->current_display;
+
+  // Add necessary JavaScript and CSS.
+  $attachments = jcarousel_views_add($view, $display_id);
+  $view->element['#attached'] = NestedArray::mergeDeep($view->element['#attached'], $attachments);
+
+  $settings = $attachments['drupalSettings']['jcarousel']['carousels'];
+  $key = key($settings);
+
+  // Build the list of classes for the carousel.
+  $options = $view->getStyle()->options;
+  $variables['attributes']['class'][] = 'jcarousel';
+  $variables['attributes']['class'][] = Html::cleanCssIdentifier('jcarousel-view--' . $view->storage->id() . '--' . $display_id);
+  $variables['attributes']['class'][] = Html::cleanCssIdentifier('jcarousel-dom-' . $settings[$key]['view_options']['jcarousel_dom_id']);
+  $variables['attributes']['data-jcarousel'][] = 'true';
+  if ($options['wrap']) {
+    $variables['attributes']['data-wrap'][] = $options['wrap'];
+  }
+  if (!empty($options['skin'])) {
+    $variables['attributes']['class'][] = 'jcarousel-skin-' . $options['skin'];
+  }
+  $variables['options'] = $options;
+
+  $scroll = !empty($options['scroll']) ? $options['scroll'] : 1;
+  $orientation = !empty($options['vertical']) && $options['vertical'] ? 'vertical' : 'horizontal';
+
+  $variables['attributes_previous'] = new Attribute();
+  $variables['attributes_previous']['data-jcarousel-control'] = 'true';
+  $variables['attributes_prevFious']['data-target'] = '-=' . $scroll;
+  $variables['attributes_previous']['class'] = [
+    'jcarousel-prev',
+    'jcarousel-prev-' . $orientation,
+  ];
+
+  $variables['attributes_next'] = new Attribute();
+  $variables['attributes_next']['data-jcarousel-control'] = 'true';
+  $variables['attributes_next']['data-target'] = '+=' . $scroll;
+  $variables['attributes_next']['class'] = [
+    'jcarousel-next',
+    'jcarousel-next-' . $orientation,
+  ];
+
+  $variables['content_attributes'] = new Attribute();
+  $variables['content_attributes']['class'] = [
+    'jcarousel-container-' . $orientation,
+  ];
+
+  // Give each item a class to identify where in the carousel it belongs.
+  foreach ($variables['rows'] as $id => $row) {
+    $number = $id + 1 + $view->pager->getOffset();
+    $zebra = ($number % 2 == 0) ? 'even' : 'odd';
+
+    $row_attribute = new Attribute();
+    $row_attribute['class'] = [
+      'jcarousel-item',
+      'jcarousel-item-' . $number,
+      'jcarousel-item-' . $orientation,
+      $zebra
+    ];
+    $variables['row_attributes'][$id] = $row_attribute;
+  }
 }

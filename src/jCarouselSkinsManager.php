@@ -37,14 +37,14 @@ class jCarouselSkinsManager extends DefaultPluginManager {
   /**
    * {@inheritdoc}
    */
-  protected $defaults = array(
+  protected $defaults = [
     // Human readable label for skin.
     'label' => '',
     // The file containing css for the skin.
     'file' => '',
     // Weight used for ordering skins.
     'weight' => 0,
-  );
+  ];
 
   /**
    * The theme handler.
@@ -71,7 +71,7 @@ class jCarouselSkinsManager extends DefaultPluginManager {
     $this->themeHandler = $theme_handler;
     $this->setStringTranslation($string_translation);
     $this->alterInfo('jcarousel_skins');
-    $this->setCacheBackend($cache_backend, 'jcarousel_skins', array('jcarousel_skins'));
+    $this->setCacheBackend($cache_backend, 'jcarousel_skins', ['jcarousel_skins']);
   }
 
   /**
@@ -97,7 +97,7 @@ class jCarouselSkinsManager extends DefaultPluginManager {
    */
   public function clearCachedDefinitions() {
     parent::clearCachedDefinitions();
-    $this->instances = array();
+    $this->instances = [];
   }
 
 }
