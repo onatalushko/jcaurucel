@@ -16,7 +16,7 @@
 
       $('[data-jcarousel]').each(function() {
         var el = $(this);
-        console.log(el);
+        console.log(el.data());
         el.jcarousel(el.data());
       });
 

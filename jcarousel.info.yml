@@ -2,4 +2,5 @@ name: jCarousel
 type: module
 description: Create jQuery-based carousel rotators.
 package: User interface
+configure: jcarousel.config
 core: 8.x
