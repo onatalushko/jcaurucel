@@ -26,7 +26,7 @@ class JCarouselConfig extends ConfigFormBase {
    * {@inheritdoc}
    */
   protected function getEditableConfigNames() {
-    return ['jcaroucel.settings'];
+    return ['jcarousel.settings'];
   }
 
   /**

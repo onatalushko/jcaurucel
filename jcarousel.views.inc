@@ -196,6 +196,6 @@ function template_preprocess_views_view_jcarousel(&$variables) {
   $variables['options'] = $view->getStyle()->options;
 
   unset($variables['attributes']);
-  $variables += generate_attributes($variables['rows'], $variables['options']);
+  $variables += _jcarousel_generate_attributes($variables['rows'], $variables['options']);
   $variables['items'] = $variables['rows'];
 }
