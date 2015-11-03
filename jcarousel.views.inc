@@ -182,7 +182,7 @@ function jcarousel_views_add(ViewExecutable $view, $display_id = NULL) {
 }
 
 /*
- * Preprocess function for views-view-jcarousell.html.twig.
+ * Preprocess function for views-view-jcarousel.html.twig.
  */
 function template_preprocess_views_view_jcarousel(&$variables) {
   $view = &$variables['view'];

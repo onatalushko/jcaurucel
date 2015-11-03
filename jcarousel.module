@@ -328,7 +328,7 @@ function jcarousel_theme() {
   return [
     'jcarousel' => [
       'variables' => [
-        'rows' => [],
+        'items' => [],
         'options' => [],
         'identifier' => NULL,
       ],
