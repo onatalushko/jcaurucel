@@ -1,9 +1,7 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: oleg
- * Date: 25.10.15
- * Time: 21:15
+ * @file
+ * JCarousel global config class.
  */
 
 namespace Drupal\jcarousel;
@@ -11,7 +9,12 @@ namespace Drupal\jcarousel;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 
-class jcarouselConfig extends ConfigFormBase {
+/**
+ * Class jcarouselConfig.
+ *
+ * @package Drupal\jcarousel
+ */
+class JCarouselConfig extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
@@ -39,4 +42,5 @@ class jcarouselConfig extends ConfigFormBase {
   protected function getEditableConfigNames() {
     return ['jcaroucel.settings'];
   }
+
 }

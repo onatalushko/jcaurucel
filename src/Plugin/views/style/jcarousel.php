@@ -19,7 +19,7 @@ use Drupal\Core\Form\FormStateInterface;
  *   id = "jcarousel",
  *   title = @Translation("jCarousel"),
  *   help = @Translation("Displays rows in a jCarousel."),
- *   theme = "jcarousel__views",
+ *   theme = "views_view_jcarousel",
  *   display_types = {"normal"}
  * )
  */

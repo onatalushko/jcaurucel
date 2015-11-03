@@ -328,7 +328,7 @@ function jcarousel_theme() {
   return [
     'jcarousel' => [
       'variables' => [
-        'items' => [],
+        'rows' => [],
         'options' => [],
         'identifier' => NULL,
       ],
@@ -421,7 +421,7 @@ function jcarousel_library_info_alter(&$libraries, $extension) {
 }
 
 /**
- * Preprocess function for jcarousel.tpl.php.
+ * Preprocess function for jcarousel.html.twig.
  */
 function template_preprocess_jcarousel(&$variables) {
   // Set default options.
@@ -466,16 +466,28 @@ function template_preprocess_jcarousel(&$variables) {
 //  $settings = $attachments['drupalSettings']['jcarousel']['carousels'];
 //  $key = key($settings);
 
+  $variables['options'] = $options;
+  unset($variables['attributes']);
+  $variables += generate_attributes($variables['items'], $variables['options']);
+
+}
+
+function generate_attributes($items, $options) {
+  $ret = [];
+  $ret['attributes'] = new Attribute();
+  $ret['attributes_wrapper'] = new Attribute();
+  $ret['attributes_previous'] = new Attribute();
+  $ret['attributes_next'] = new Attribute();
+  $ret['attributes_content'] = new Attribute();
+
   // Build the list of classes for the carousel.
-  $variables['attributes']['class'][] = 'jcarousel';
-//  $variables['attributes']['class'][] = Html::cleanCssIdentifier('jcarousel-view--' . $view->storage->id() . '--' . $display_id);
-//  $variables['attributes']['class'][] = Html::cleanCssIdentifier('jcarousel-dom-' . $settings[$key]['view_options']['jcarousel_dom_id']);
-  $variables['attributes']['data-jcarousel'][] = 'true';
+  $ret['attributes']->addClass('jcarousel');
+  $ret['attributes']->setAttribute('data-jcarousel', 'true');
   if ($options['wrap']) {
-    $variables['attributes']['data-wrap'][] = $options['wrap'];
+    $ret['attributes']->setAttribute('data-wrap', $options['wrap']);
   }
   if ($options['vertical']) {
-    $variables['attributes']['data-vertical'][] = 'true';
+    $ret['attributes']->setAttribute('data-vertical', 'true');
   }
 
   $orientation = !empty($options['vertical']) && $options['vertical'] ? 'vertical' : 'horizontal';
@@ -483,45 +495,32 @@ function template_preprocess_jcarousel(&$variables) {
   // scroll all visible elements at a time if scroll = 'auto'
   $scroll = !empty($options['scroll']) ? $options['scroll'] : $options['visible'];
 
-  $variables['wrapper_attributes'] = new Attribute();
-  $variables['wrapper_attributes']['class'] = ['jcarousel-wrapper', 'jcarousel-visible-' . $options['visible']];
+  $ret['attributes_wrapper']->addClass('jcarousel-wrapper', 'jcarousel-visible-' . $options['visible']);
   if (!empty($options['skin'])) {
-    $variables['wrapper_attributes']['class'][] = 'jcarousel-skin-' . $options['skin'];
+    $ret['attributes_wrapper']->addClass('jcarousel-skin-' . $options['skin']);
   }
-  $variables['attributes_previous'] = new Attribute();
-  $variables['attributes_previous']['data-jcarousel-control'] = 'true';
-  $variables['attributes_previous']['data-target'] = '-=' . $scroll;
-  $variables['attributes_previous']['class'] = [
-    'jcarousel-control-prev',
-//    'jcarousel-prev-' . $orientation,
-  ];
 
-  $variables['attributes_next'] = new Attribute();
-  $variables['attributes_next']['data-jcarousel-control'] = 'true';
-  $variables['attributes_next']['data-target'] = '+=' . $scroll;
-  $variables['attributes_next']['class'] = [
-    'jcarousel-control-next',
-//    'jcarousel-next-' . $orientation,
-  ];
+  $ret['attributes_content']->addClass('jcarousel-container-' . $orientation);
 
-  $variables['content_attributes'] = new Attribute();
-  $variables['wrapper_attributes']['class'][] = 'jcarousel-' . $orientation;
+  $ret['attributes_previous']->setAttribute('data-jcarousel-control', 'true');
+  $ret['attributes_previous']->setAttribute('data-target', '-=' . $scroll);
+  $ret['attributes_previous']->addClass('jcarousel-control-prev');
+
+  $ret['attributes_next']->setAttribute('data-jcarousel-control', 'true');
+  $ret['attributes_next']->setAttribute('data-target', '+=' . $scroll);
+  $ret['attributes_next']->addClass('jcarousel-control-next');
+
+  $ret['attributes_wrapper']->addClass('jcarousel-' . $orientation);
 
   // Give each item a class to identify where in the carousel it belongs.
-  foreach ($variables['items'] as $id => $row) {
-    $number = $id + 1;
-    $zebra = ($number % 2 == 0) ? 'even' : 'odd';
-
+  foreach ($items as $id => $row) {
     $row_attribute = new Attribute();
-//    $row_attribute['class'] = [
-//      'jcarousel-item',
-//      'jcarousel-item-' . $number,
-//      'jcarousel-item-' . $orientation,
-//      $zebra
-//    ];
-    $variables['row_attributes'][$id] = $row_attribute;
+    $ret['attributes_row'][$id] = $row_attribute;
   }
+
+  return $ret;
 }
+
 
 function jcarousel_page_attachments(&$page) {
   $jcarousel_global_load = \Drupal::config('jcarousel.settings')->get('global_load');
