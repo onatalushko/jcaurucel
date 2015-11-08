@@ -145,37 +145,37 @@ function jcarousel_views_add(ViewExecutable $view, $display_id = NULL) {
   // to jCarousel 2.6 used the view-level "Use AJAX" option instead of a style
   // setting. We check $view->style_options here intentionally instead of
   // $view->style_plugin->options.
-  $use_ajax = isset($view->getStyle()->options['ajax']) ? $view->getStyle()->options['ajax'] : $view->ajaxEnabled();
+//  $use_ajax = isset($view->getStyle()->options['ajax']) ? $view->getStyle()->options['ajax'] : $view->ajaxEnabled();
 
   // If using AJAX, adjust the view's positioning based on the current page.
-  if ($use_ajax) {
+  if ($view->ajaxEnabled()) {
     $options['ajax'] = TRUE;
-    $options['size'] = $count;
+//    $options['size'] = $count;
 
     // Adjusting the query is not necessary.
-    $view->build($display_id);
+//    $view->build($display_id);
 
     // Create generic variable names.
-    $pager_current_page = $view->getCurrentPage();
-    $pager_items_per_page = $view->getItemsPerPage();
-    $pager_offset = $view->getOffset();
+//    $pager_current_page = $view->getCurrentPage();
+//    $pager_items_per_page = $view->getItemsPerPage();
+//    $pager_offset = $view->getOffset();
 
     // If starting in the middle of a view, initialize the carousel at that
     // position. Strangely the carousel must pre-load empty LI items all the way
     // up until the active item, making this inefficient for large lists.
-    if ($pager_current_page) {
+//    if ($pager_current_page) {
       // TODO: Pagers and carousels do not work well together. jCarousel should
       // give items the class "jcarousel-item-[offset]", but instead it always
       // starts with "1", making it impossible to define a prepopulated list
       // as the middle of an AJAX view.
-      $options['start'] = ($pager_current_page * $pager_items_per_page) + ($pager_offset + 1);
-      $options['offset'] = ($pager_current_page * $pager_items_per_page) + ($pager_offset + 1);
+//      $options['start'] = ($pager_current_page * $pager_items_per_page) + ($pager_offset + 1);
+//      $options['offset'] = ($pager_current_page * $pager_items_per_page) + ($pager_offset + 1);
     }
-    elseif ($pager_offset) {
-      $options['start'] = $pager_offset + 1;
-      $options['offset'] = $pager_offset + 1;
-    }
-  }
+//    elseif ($pager_offset) {
+//      $options['start'] = $pager_offset + 1;
+//      $options['offset'] = $pager_offset + 1;
+//    }
+//  }
 
   $identifier = Html::cleanCssIdentifier('jcarousel_dom_' . $options['view_options']['jcarousel_dom_id']);
   return jcarousel_add($identifier, $options);

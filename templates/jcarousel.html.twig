@@ -5,7 +5,7 @@
  *
  * Available variables
  * - attributes: A list of HTML attributes for the wrapper element.
- * - rows: The rendered rows.
+ * - items: The rendered rows.
  *
  * @see template_preprocess_jcarousel_view()
  *
@@ -13,6 +13,7 @@
  */
 #}
 {#{{ dump(options) }}#}
+{#{{ dump(attributes) }}#}
 <div{{ attributes_wrapper }}>
   {% if options.navigation == 'before' %}
     <a{{ attributes_previous }}  href="#"></a>
