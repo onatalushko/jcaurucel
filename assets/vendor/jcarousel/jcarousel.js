@@ -3,77 +3,47 @@
  * Add jCarousel behaviors to the page and provide Views-support.
  */
 
-(function ($, Drupal, window, drupalSettings) {
+(function ($, Drupal, window) {
   "use strict";
 
   Drupal.behaviors.jcarousel = {
-    attach: function (context, drupalSettings) {
-      // If no carousels exist on this part of the page, work no further.
-//      if (!drupalSettings.jcarousel || !drupalSettings.jcarousel.carousels) {
-//        return;
-//      }
-//      console.log(drupalSettings.jcarousel.carousels);
+    attach: function (context) {
+      $(context).find('[data-jcarousel]').once('jcarousel').each(function() {
+        var options = $(this).data();
+        var events = options.events;
+        delete options.events;
 
-      $('[data-jcarousel]').each(function() {
-        var el = $(this);
-        console.log(el.data());
-        el.jcarousel(el.data());
+        var autoscroll_options = {};
+        for (var option in options) {
+          if (option.indexOf('autoscroll-') == 0) {
+            var param_name = option.replace('autoscroll-', '');
+            autoscroll_options[param_name] = options[option];
+            delete options[option];
+          }
+        }
+
+        var instance = $(this).jcarousel(options);
+        Drupal.jcarousel.attachEvents(events, instance);
+        console.log('autoscroll');
+        console.log(autoscroll_options);
+        if (autoscroll_options.length != 0) {
+          instance.jcarouselAutoscroll(autoscroll_options);
+        }
+
       });
 
-      $('[data-jcarousel-control]').each(function() {
-        var el = $(this);
-        console.log(el);
-        el.jcarouselControl(el.data());
+      $(context).find('[data-jcarousel-control]').once('jcarousel').each(function() {
+        var options = $(this).data();
+        var events = options.events;
+        delete options.events;
+        var instance = $(this).jcarouselControl(options);
+        Drupal.jcarousel.attachEvents(events, instance);
       });
 
-
-      //$('ul.jcarousel li').css('display', '');
-
-      //$.each(drupalSettings.jcarousel.carousels, function (key, options) {
-      //  var $carousel = $(options.selector + ':not(.jcarousel-processed)', context);
-      //
-      //  // If this carousel has already been processed or doesn't exist, move on.
-      //  if (!$carousel.length) {
-      //    return;
-      //  }
-      //
-      //  var callbacks = options.callbacks || {};
-      //  delete options.callbacks;
-      //
-      //  console.log($carousel);
-      //  console.log(options);
-      //
-      //  // @todo refactor need.
-      //  // Callbacks need to be converted from a string to an actual function.
-      //  //$.each(callbacks, function (callback) {
-      //  //  if (typeof callback == 'string') {
-      //  //    console.log(callback);
-      //  //    var callbackFunction = window;
-      //  //    var callbackParents = options[optionKey].split('.');
-      //  //    $.each(callbackParents, function (objectParent) {
-      //  //      callbackFunction = callbackFunction[callbackParents[objectParent]];
-      //  //    });
-      //  //    options[optionKey] = callbackFunction;
-      //  //  }
-      //  //});
       //  // @todo refactor need.
       //  // Add standard options required for AJAX functionality.
       //  //if (options.ajax && !options.itemLoadCallback) {
       //  //  options.itemLoadCallback = Drupal.jcarousel.ajaxLoadCallback;
-      //  //}
-      //
-      //  // If auto-scrolling, pause animation when hoving over the carousel.
-      //  if (options.auto && options.autoPause && !callbacks.initCallback) {
-      //    $carousel.on('jcarousel:createend', function (event, carousel) {
-      //      Drupal.jcarousel.autoPauseCallback(event, carousel);
-      //    });
-      //  }
-      //
-      //  // Add responsive behavior.
-      //  //if (options.responsive && !options.reloadCallback) {
-      //  //  options.vertical = false;
-      //  //  options.visible = null;
-      //  //  options.reloadCallback = Drupal.jcarousel.reloadCallback;
       //  //}
       //
       //  // Add navigation to the carousel if enabled.
@@ -96,40 +66,54 @@
       //      }
       //    });
       //  }
-      //
-      //  // @todo remove it
-      //  //if (!options.hasOwnProperty('buttonNextHTML') && !options.hasOwnProperty('buttonPrevHTML')) {
-      //  //  options.buttonNextHTML = Drupal.theme('jCarouselButton', 'next');
-      //  //  options.buttonPrevHTML = Drupal.theme('jCarouselButton', 'previous');
-      //  //}
-      //
-      //  console.log(options);
-      //  // Initialize the jcarousel.
-      //  $carousel.addClass('jcarousel-processed').jcarousel(options);
-      //});
-    }
-  }
 
+    }
+  };
 
   Drupal.jcarousel = {};
-  Drupal.jcarousel.reloadCallback = function (carousel) {
+
+  /**
+   * Attach event callbacks.
+   *
+   * @param events
+   *   Event array.
+   * @param element
+   *   jCarousel object.
+   */
+  Drupal.jcarousel.attachEvents = function(events, element) {
+    for (var ev in events) {
+      var behavior = events[ev].split('.');
+      if ($.isFunction(Drupal[behavior[0]][behavior[1]])) {
+        element.on(ev, Drupal[behavior[0]][behavior[1]](event, element));
+      }
+    }
+  };
+
+  Drupal.jcarousel.reloadCallback = function (event, carousel) {
     // Set the clip and container to auto width so that they will fill
     // the available space.
-    carousel.container.css('width', 'auto');
-    carousel.clip.css('width', 'auto');
-    var clipWidth = carousel.clip.width();
-    var containerExtra = carousel.container.width() - carousel.clip.outerWidth(true);
-    // Determine the width of an item.
-    var itemWidth = carousel.list.find('li').first().outerWidth(true);
-    var numItems = Math.floor(carousel.clip.width() / itemWidth) || 1;
-    // Set the new scroll number.
-    carousel.options.scroll = numItems;
-    var newClipWidth = numItems * itemWidth;
-    var newContainerWidth = newClipWidth + containerExtra;
-    // Resize the clip and container.
-    carousel.clip.width(newClipWidth);
-    carousel.container.width(newContainerWidth);
+    var width = carousel.innerWidth();
+    carousel.jcarousel('items').css('width', 'auto');
+//    carousel.jcarousel('items').css('width', width + 'px');
+//    carousel.carousel('items')container.css('width', 'auto');
+//    carousel.clip.css('width', 'auto');
+//    var clipWidth = carousel.clip.width();
+//    var containerExtra = carousel.container.width() - carousel.clip.outerWidth(true);
+//     Determine the width of an item.
+    var itemWidth = carousel.jcarousel('items').find('li').first().outerWidth(true);
+    var numItems = Math.floor(width / itemWidth) || 1;
+    carousel.jcarousel('items').css('width', itemWidth + 'px');
+
+//    var numItems = Math.floor(carousel.clip.width() / itemWidth) || 1;
+//     Set the new scroll number.
+//    carousel.options.scroll = numItems;
+//    var newClipWidth = numItems * itemWidth;
+//    var newContainerWidth = newClipWidth + containerExtra;
+//     Resize the clip and container.
+//    carousel.clip.width(newClipWidth);
+//    carousel.container.width(newContainerWidth);
   };
+
   Drupal.jcarousel.ajaxLoadCallback = function (jcarousel, state) {
     // Check if the requested items already exist.
     if (state == 'init' || jcarousel.has(jcarousel.first, jcarousel.last)) {
@@ -182,22 +166,23 @@
   */
   Drupal.jcarousel.autoPauseCallback = function (event, carousel) {
     function pauseAuto() {
-      carousel.stopAuto();
+      carousel.jcarouselAutoscroll('stop');
     }
 
     function resumeAuto() {
-      carousel.startAuto();
+      carousel.jcarouselAutoscroll('start');
     }
 
-    carousel.clip.hover(pauseAuto, resumeAuto);
-    carousel.buttonNext.hover(pauseAuto, resumeAuto);
-    carousel.buttonPrev.hover(pauseAuto, resumeAuto);
+    carousel.hover(pauseAuto, resumeAuto);
+//    carousel.buttonNext.hover(pauseAuto, resumeAuto);
+//    carousel.buttonPrev.hover(pauseAuto, resumeAuto);
   };
 
   /**
   * Setup callback for jCarousel. Calculates number of pages.
   */
   Drupal.jcarousel.createCarousel = function (event, carousel) {
+    console.log('create');
     // Determine the number of pages this carousel includes.
     // This only works for a positive starting point. Also, .first is 1-based
     // while .last is a count, so we need to reset the .first number to be
@@ -214,10 +199,6 @@
     if (carousel.options.wrap != 'circular' && carousel.pageCount == 1) {
       carousel.buttons(false, false);
     }
-
-    // Always remove the hard-coded display: block from the navigation.
-    //carousel.buttonNext.css('display', '');
-    //carousel.buttonPrev.css('display', '');
   };
 
  /**
@@ -310,13 +291,4 @@
     }));
   };
 
-  Drupal.theme.jCarouselButton = function (type) {
-    // Use links for buttons for accessibility.
-    return '<a href="#" class="jcarousel-' + type + '"></a>';
-  };
-
-  Drupal.theme.jCarouselPageLink = function (pageNumber) {
-    return '<a href="javascript:void(0)"><span>' + (pageNumber) + '</span></a>';
-  };
-
-})(jQuery, Drupal, window, drupalSettings);
+})(jQuery, Drupal, window);

@@ -1,22 +1,32 @@
 <?php
+
 /**
- * Created by PhpStorm.
- * User: oleg
- * Date: 25.10.15
- * Time: 21:15
+ * @file
+ * Contains \Drupal\jcarousel\Form\JCarouselConfig.
  */
 
-namespace Drupal\jcarousel;
+namespace Drupal\jcarousel\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 
-class jcarouselConfig extends ConfigFormBase {
+/**
+ * Configure jCarousel global settings.
+ */
+class JCarouselConfig extends ConfigFormBase {
+
   /**
    * {@inheritdoc}
    */
   public function getFormID() {
     return 'jcarousel_config';
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getEditableConfigNames() {
+    return ['jcarousel.settings'];
   }
 
   /**
@@ -33,10 +43,4 @@ class jcarouselConfig extends ConfigFormBase {
     return parent::buildForm($form, $form_state);
   }
 
-  /**
-   * {@inheritdoc}
-   */
-  protected function getEditableConfigNames() {
-    return ['jcarousel.settings'];
-  }
 }

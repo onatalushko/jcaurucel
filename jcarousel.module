@@ -4,17 +4,18 @@
  * @file
  * Provides integration with 3rd party modules and the jCarousel library.
  */
-use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Asset;
 use Drupal\Core\Template\Attribute;
 use Drupal\jcarousel;
 use Drupal\Core\Routing\RouteMatchInterface;
-use \Drupal\Component\Utility\Html;
+use Drupal\Component\Serialization\Json;
 
 /**
  * Implements hook_help().
  */
 function jcarousel_help($route_name, RouteMatchInterface $route_match) {
+  $output = '';
+
   switch ($route_name) {
     case 'help.page.jcarousel':
       $details = [
@@ -25,32 +26,42 @@ function jcarousel_help($route_name, RouteMatchInterface $route_match) {
 
       $module_handler = \Drupal::moduleHandler();
       $renderer = \Drupal::service('renderer');
-      $output = '';
 
       $output .= '<p>' . t('The jCarousel module provides the ability to create carousel-style lists such as those included on this page. The jCarousel module includes integrations with other Drupal modules, but may also be used manually within your own theme or custom modules. It does not include any site-wide settings page or options, each carousel is separately configured.') . '</p>';
 
       $output .= '<h2>' . t('Views integration') . '</h2>';
       $output .= '<p>';
-      $output .= t('Most configuration options for the jCarousel module are provided through <a href=":views">Views module</a>.', [
-          ':views' => $module_handler->moduleExists('views') ? \Drupal::url('help.page', ['name' => 'views']) : '#']
+      $output .= t('Most configuration options for the jCarousel module are provided through <a href=":views">Views module</a>.',
+        [':views' => $module_handler->moduleExists('views') ? \Drupal::url('help.page', ['name' => 'views']) : '#']
       );
       if ($module_handler->moduleExists('views_ui')) {
-        $output .= ' ' . t('You may configure a new view through the <a href=":views-url">Views module interface</a>. After adding a new view, change its "Display style" to "jCarousel" and configure the remaining options there. When using the jCarousel display style with Views, you can construct any of the examples on this page as well as dynamically loaded carousels through AJAX requests.', [
-            ':views-url' => \Drupal::url('entity.view.collection'),
-          ]);
+        $output .= ' ' . t('You may configure a new view through the <a href=":views-url">Views module interface</a>. After adding a new view, change its "Display style" to "jCarousel" and configure the remaining options there. When using the jCarousel display style with Views, you can construct any of the examples on this page as well as dynamically loaded carousels through AJAX requests.',
+            [':views-url' => \Drupal::url('entity.view.collection')]
+          );
       }
       elseif ($module_handler->moduleExists('views')) {
-        $output .= ' ' . t('This site not have Views (or the Views UI module) installed currently. You may be able to turn on this module under your site\'s <a href="!modules-url">module page</a>, or you may have to <a href=":module">download Views module</a> and install it.', [
-            ':modules-url' => \Drupal::url('system.modules_list'),
-          ]);
+        $output .= ' ' . t('This site not have Views (or the Views UI module) installed currently. You may be able to turn on this module under your site\'s <a href="!modules-url">module page</a>, or you may have to <a href=":module">download Views module</a> and install it.',
+            [':modules-url' => \Drupal::url('system.modules_list')]
+          );
       }
       $output .= '</p>';
 
       $output .= '<h2>' . t('Custom implementations') . '</h2>';
-      $output .= '<p>' . t('The following are demonstrations of jCarousel module when used directly by another module or your theme. <strong>Most users do not need to manually code carousels</strong> (building carousels using Views is the most common approach), but these demonstrations provide good examples of jCarousel\'s abilities.') . '</p>';
+      $output .= '<p>' . t("The following are demonstrations of jCarousel module when used directly by another module or your theme. <strong>Most users do not need to manually code carousels</strong> (building carousels using Views is the most common approach), but these demonstrations provide good examples of jCarousel's abilities.") . '</p>';
 
       $images = _jcarousel_help_image_list();
-      $jcourusel = _jcarousel_help_render_gen($images);
+      $options = [
+        'auto' => 2,
+        'autoPause' => TRUE,
+        'wrap' => 'circular',
+        'responsive' => TRUE,
+        'events' => [
+          'jcarousel' => [
+//            'jcarousel:create' => 'jcarousel.createCarousel',
+          ],
+        ],
+      ];
+      $jcourusel = _jcarousel_help_render_gen($images, $options);
       $output .= $renderer->render($jcourusel);
 
       // Provide the horizontal carousel demonstration.
@@ -58,6 +69,8 @@ function jcarousel_help($route_name, RouteMatchInterface $route_match) {
       $output .= '<p>' . t('This example uses <code>jcarousel_add()</code> directly with no options to create the default horizontal carousel.') . '</p>';
       $output .= $renderer->render($jcourusel);
 
+      // @todo Properly implement.
+      $list = '';
       $list_html = '<ul class="horizontalcarousel jcarousel-skin-default">' . $list . '</ul>';
 
       $sample = $details;
@@ -82,14 +95,7 @@ function jcarousel_help($route_name, RouteMatchInterface $route_match) {
         ]) . '</p>';
       $list_html = '<ul class="verticalcarousel jcarousel-skin-default">' . $list . '</ul>';
 
-      $images = array(
-        'http://sorgalla.com/jcarousel/examples/_shared/img/img1.jpg',
-        'http://sorgalla.com/jcarousel/examples/_shared/img/img2.jpg',
-        'http://sorgalla.com/jcarousel/examples/_shared/img/img3.jpg',
-        'http://sorgalla.com/jcarousel/examples/_shared/img/img4.jpg',
-        'http://sorgalla.com/jcarousel/examples/_shared/img/img5.jpg',
-        'http://sorgalla.com/jcarousel/examples/_shared/img/img6.jpg',
-      );
+      $images = _jcarousel_help_image_list();
 
       $item_lists = [];
       foreach ($images as $image) {
@@ -153,14 +159,7 @@ function jcarousel_help($route_name, RouteMatchInterface $route_match) {
       // Another thing you can do is use the theme('jcarousel') function.
       $output .= '<h3>' . t('Theme function') . '</h3>';
 
-      $images = array(
-        'http://sorgalla.com/jcarousel/examples/_shared/img/img1.jpg',
-        'http://sorgalla.com/jcarousel/examples/_shared/img/img2.jpg',
-        'http://sorgalla.com/jcarousel/examples/_shared/img/img3.jpg',
-        'http://sorgalla.com/jcarousel/examples/_shared/img/img4.jpg',
-        'http://sorgalla.com/jcarousel/examples/_shared/img/img5.jpg',
-        'http://sorgalla.com/jcarousel/examples/_shared/img/img6.jpg',
-      );
+      $images = _jcarousel_help_image_list();
 
       $item_lists = [];
       foreach ($images as $image) {
@@ -253,12 +252,15 @@ function jcarousel_help($route_name, RouteMatchInterface $route_match) {
       ];
 //      $output .= $renderer->render($example);
 
-      return $output;
   }
+  return $output;
 }
 
 /**
- *  Hook_help helper.
+ * Returns demo images.
+ *
+ * @return array
+ *   An array of image URLs.
  */
 function _jcarousel_help_image_list() {
   return [
@@ -272,11 +274,15 @@ function _jcarousel_help_image_list() {
 }
 
 /**
- * Hook_help helper.
+ * Builds carousel from image URLs.
  *
- * @param $images
+ * @param array $images
+ *   Array of image URLs.
  * @param array $options
+ *   The carousel options.
+ *
  * @return array
+ *   Renderable array of carousel.
  */
 function _jcarousel_help_render_gen($images, $options = []) {
   $item_lists = [];
@@ -311,14 +317,6 @@ function _jcarousel_help_render_gen($images, $options = []) {
 //    'type' => MENU_CALLBACK,
 //  );
 //  return $items;
-//}
-
-/**
- * Implementation of hook_init().
- */
-//function jcarousel_init() {
-// Global JS settings required for all carousels.
-//  drupal_add_js(array('jcarousel' => array('ajaxPath' => url('jcarousel/ajax/views'))), 'setting');
 //}
 
 /**
@@ -421,7 +419,7 @@ function jcarousel_library_info_alter(&$libraries, $extension) {
 }
 
 /**
- * Preprocess function for jcarousel.tpl.php.
+ * Preprocess function for jcarousel.html.twig.
  */
 function template_preprocess_jcarousel(&$variables) {
   // Set default options.
@@ -466,63 +464,105 @@ function template_preprocess_jcarousel(&$variables) {
 //  $settings = $attachments['drupalSettings']['jcarousel']['carousels'];
 //  $key = key($settings);
 
-  // Build the list of classes for the carousel.
-  $variables['attributes']['class'][] = 'jcarousel';
-//  $variables['attributes']['class'][] = Html::cleanCssIdentifier('jcarousel-view--' . $view->storage->id() . '--' . $display_id);
-//  $variables['attributes']['class'][] = Html::cleanCssIdentifier('jcarousel-dom-' . $settings[$key]['view_options']['jcarousel_dom_id']);
-  $variables['attributes']['data-jcarousel'][] = 'true';
-  if ($options['wrap']) {
-    $variables['attributes']['data-wrap'][] = $options['wrap'];
-  }
-  if ($options['vertical']) {
-    $variables['attributes']['data-vertical'][] = 'true';
-  }
+  $variables['options'] = $options;
+  unset($variables['attributes']);
+  $variables += _jcarousel_generate_attributes($variables['items'], $variables['options']);
 
-  $orientation = !empty($options['vertical']) && $options['vertical'] ? 'vertical' : 'horizontal';
+}
+
+
+/**
+ * Helper to build attributes array for carousel items.
+ *
+ * @param array $items
+ *   The carousel items.
+ * @param array $options
+ *   The options for carousel.
+ *
+ * @return array
+ *   An array of attributes.
+ */
+function _jcarousel_generate_attributes($items, $options) {
+  $attributes = [];
+  $attributes['attributes'] = new Attribute();
+  $attributes['attributes_wrapper'] = new Attribute();
+  $attributes['attributes_previous'] = new Attribute();
+  $attributes['attributes_next'] = new Attribute();
+  $attributes['attributes_content'] = new Attribute();
+
+  // Build the list of classes for the carousel.
+  $attributes['attributes']->addClass('jcarousel');
+  $attributes['attributes']->setAttribute('data-jcarousel', 'true');
 
   // scroll all visible elements at a time if scroll = 'auto'
   $scroll = !empty($options['scroll']) ? $options['scroll'] : $options['visible'];
 
-  $variables['wrapper_attributes'] = new Attribute();
-  $variables['wrapper_attributes']['class'] = ['jcarousel-wrapper', 'jcarousel-visible-' . $options['visible']];
-  if (!empty($options['skin'])) {
-    $variables['wrapper_attributes']['class'][] = 'jcarousel-skin-' . $options['skin'];
+  if ($options['auto'] > 0 && $options['autoPause'] && empty($options['events']['jcarousel']['jcarousel:createend'])) {
+    $options['events']['jcarousel']['jcarousel:createend'] = 'jcarousel.autoPauseCallback';
+    $attributes['attributes']->setAttribute('data-autoscroll-interval', $options['auto'] * 1000);
+    $attributes['attributes']->setAttribute('data-autoscroll-autostart', 'true');
+    $attributes['attributes']->setAttribute('data-autoscroll-target', '+=' . $scroll);
   }
-  $variables['attributes_previous'] = new Attribute();
-  $variables['attributes_previous']['data-jcarousel-control'] = 'true';
-  $variables['attributes_previous']['data-target'] = '-=' . $scroll;
-  $variables['attributes_previous']['class'] = [
-    'jcarousel-control-prev',
-//    'jcarousel-prev-' . $orientation,
-  ];
 
-  $variables['attributes_next'] = new Attribute();
-  $variables['attributes_next']['data-jcarousel-control'] = 'true';
-  $variables['attributes_next']['data-target'] = '+=' . $scroll;
-  $variables['attributes_next']['class'] = [
-    'jcarousel-control-next',
-//    'jcarousel-next-' . $orientation,
-  ];
+  if ($options['responsive'] && empty($options['events']['jcarousel']['jcarousel:reload'])) {
+    $options['vertical'] = FALSE;
+    unset($options['visible']);
+    $options['events']['jcarousel']['jcarousel:reload'] = 'jcarousel.reloadCallback';
+  }
 
-  $variables['content_attributes'] = new Attribute();
-  $variables['wrapper_attributes']['class'][] = 'jcarousel-' . $orientation;
+  if (!empty($options['events']['jcarousel'])) {
+    $attributes['attributes']->setAttribute('data-events', Json::encode($options['events']['jcarousel']));
+  }
+
+  if ($options['wrap']) {
+    $attributes['attributes']->setAttribute('data-wrap', $options['wrap']);
+  }
+  if ($options['vertical']) {
+    $attributes['attributes']->setAttribute('data-vertical', 'true');
+  }
+
+  $orientation = !empty($options['vertical']) && $options['vertical'] ? 'vertical' : 'horizontal';
+
+  $attributes['attributes_wrapper']->addClass('jcarousel-wrapper');
+
+  if ($options['visible']) {
+    $attributes['attributes_wrapper']->addClass('jcarousel-visible-' . $options['visible']);
+  }
+
+  if (!empty($options['skin'])) {
+    $attributes['attributes_wrapper']->addClass('jcarousel-skin-' . $options['skin']);
+  }
+
+  $attributes['attributes_content']->addClass('jcarousel-container-' . $orientation);
+
+  $attributes['attributes_previous']->setAttribute('data-jcarousel-control', 'true');
+  if (!empty($options['events']['jcarouselcontrol'])) {
+    $attributes['attributes_previous']->setAttribute('data-events', Json::encode($options['events']['jcarouselcontrol']));
+  }
+  $attributes['attributes_previous']->setAttribute('data-target', '-=' . $scroll);
+  $attributes['attributes_previous']->addClass('jcarousel-control-prev');
+
+  $attributes['attributes_next']->setAttribute('data-jcarousel-control', 'true');
+  if (!empty($options['events']['jcarouselcontrol'])) {
+    $attributes['attributes_next']->setAttribute('data-events', Json::encode($options['events']['jcarouselcontrol']));
+  }
+  $attributes['attributes_next']->setAttribute('data-target', '+=' . $scroll);
+  $attributes['attributes_next']->addClass('jcarousel-control-next');
+
+  $attributes['attributes_wrapper']->addClass('jcarousel-' . $orientation);
 
   // Give each item a class to identify where in the carousel it belongs.
-  foreach ($variables['items'] as $id => $row) {
-    $number = $id + 1;
-    $zebra = ($number % 2 == 0) ? 'even' : 'odd';
-
+  foreach ($items as $id => $row) {
     $row_attribute = new Attribute();
-//    $row_attribute['class'] = [
-//      'jcarousel-item',
-//      'jcarousel-item-' . $number,
-//      'jcarousel-item-' . $orientation,
-//      $zebra
-//    ];
-    $variables['row_attributes'][$id] = $row_attribute;
+    $attributes['attributes_row'][$id] = $row_attribute;
   }
+
+  return $attributes;
 }
 
+/**
+ * Implements hook_page_attachments().
+ */
 function jcarousel_page_attachments(&$page) {
   $jcarousel_global_load = \Drupal::config('jcarousel.settings')->get('global_load');
   if ($jcarousel_global_load) {

@@ -6,7 +6,6 @@
  */
 
 use \Drupal\Component\Utility\Html;
-use Drupal\Core\Template\Attribute;
 use \Drupal\views\ViewExecutable;
 use \Drupal\Core\Url;
 use Drupal\Component\Utility\NestedArray;
@@ -146,106 +145,57 @@ function jcarousel_views_add(ViewExecutable $view, $display_id = NULL) {
   // to jCarousel 2.6 used the view-level "Use AJAX" option instead of a style
   // setting. We check $view->style_options here intentionally instead of
   // $view->style_plugin->options.
-  $use_ajax = isset($view->getStyle()->options['ajax']) ? $view->getStyle()->options['ajax'] : $view->ajaxEnabled();
+//  $use_ajax = isset($view->getStyle()->options['ajax']) ? $view->getStyle()->options['ajax'] : $view->ajaxEnabled();
 
   // If using AJAX, adjust the view's positioning based on the current page.
-  if ($use_ajax) {
+  if ($view->ajaxEnabled()) {
     $options['ajax'] = TRUE;
-    $options['size'] = $count;
+//    $options['size'] = $count;
 
     // Adjusting the query is not necessary.
-    $view->build($display_id);
+//    $view->build($display_id);
 
     // Create generic variable names.
-    $pager_current_page = $view->getCurrentPage();
-    $pager_items_per_page = $view->getItemsPerPage();
-    $pager_offset = $view->getOffset();
+//    $pager_current_page = $view->getCurrentPage();
+//    $pager_items_per_page = $view->getItemsPerPage();
+//    $pager_offset = $view->getOffset();
 
     // If starting in the middle of a view, initialize the carousel at that
     // position. Strangely the carousel must pre-load empty LI items all the way
     // up until the active item, making this inefficient for large lists.
-    if ($pager_current_page) {
+//    if ($pager_current_page) {
       // TODO: Pagers and carousels do not work well together. jCarousel should
       // give items the class "jcarousel-item-[offset]", but instead it always
       // starts with "1", making it impossible to define a prepopulated list
       // as the middle of an AJAX view.
-      $options['start'] = ($pager_current_page * $pager_items_per_page) + ($pager_offset + 1);
-      $options['offset'] = ($pager_current_page * $pager_items_per_page) + ($pager_offset + 1);
+//      $options['start'] = ($pager_current_page * $pager_items_per_page) + ($pager_offset + 1);
+//      $options['offset'] = ($pager_current_page * $pager_items_per_page) + ($pager_offset + 1);
     }
-    elseif ($pager_offset) {
-      $options['start'] = $pager_offset + 1;
-      $options['offset'] = $pager_offset + 1;
-    }
-  }
+//    elseif ($pager_offset) {
+//      $options['start'] = $pager_offset + 1;
+//      $options['offset'] = $pager_offset + 1;
+//    }
+//  }
 
   $identifier = Html::cleanCssIdentifier('jcarousel_dom_' . $options['view_options']['jcarousel_dom_id']);
   return jcarousel_add($identifier, $options);
 }
 
 /*
- * Preprocess function for jcarousel.tpl.php.
+ * Preprocess function for views-view-jcarousel.html.twig.
  */
-function jcarousel_preprocess_jcarousel__views(&$variables) {
-  $view = $variables['view'];
+function template_preprocess_views_view_jcarousel(&$variables) {
+  $view = &$variables['view'];
   $display_id = empty($view->current_display) ? 'default' : $view->current_display;
 
   // Add necessary JavaScript and CSS.
   $attachments = jcarousel_views_add($view, $display_id);
   $view->element['#attached'] = NestedArray::mergeDeep($view->element['#attached'], $attachments);
 
-  $settings = $attachments['drupalSettings']['jcarousel']['carousels'];
-  $key = key($settings);
-
   // Build the list of classes for the carousel.
-  $options = $view->getStyle()->options;
-  $variables['attributes']['class'][] = 'jcarousel';
-  $variables['attributes']['class'][] = Html::cleanCssIdentifier('jcarousel-view--' . $view->storage->id() . '--' . $display_id);
-  $variables['attributes']['class'][] = Html::cleanCssIdentifier('jcarousel-dom-' . $settings[$key]['view_options']['jcarousel_dom_id']);
-  $variables['attributes']['data-jcarousel'][] = 'true';
-  if ($options['wrap']) {
-    $variables['attributes']['data-wrap'][] = $options['wrap'];
-  }
-  if (!empty($options['skin'])) {
-    $variables['attributes']['class'][] = 'jcarousel-skin-' . $options['skin'];
-  }
-  $variables['options'] = $options;
+  $variables['options'] = $view->getStyle()->options;
 
-  $scroll = !empty($options['scroll']) ? $options['scroll'] : 1;
-  $orientation = !empty($options['vertical']) && $options['vertical'] ? 'vertical' : 'horizontal';
-
-  $variables['attributes_previous'] = new Attribute();
-  $variables['attributes_previous']['data-jcarousel-control'] = 'true';
-  $variables['attributes_prevFious']['data-target'] = '-=' . $scroll;
-  $variables['attributes_previous']['class'] = [
-    'jcarousel-prev',
-    'jcarousel-prev-' . $orientation,
-  ];
-
-  $variables['attributes_next'] = new Attribute();
-  $variables['attributes_next']['data-jcarousel-control'] = 'true';
-  $variables['attributes_next']['data-target'] = '+=' . $scroll;
-  $variables['attributes_next']['class'] = [
-    'jcarousel-next',
-    'jcarousel-next-' . $orientation,
-  ];
-
-  $variables['content_attributes'] = new Attribute();
-  $variables['content_attributes']['class'] = [
-    'jcarousel-container-' . $orientation,
-  ];
-
-  // Give each item a class to identify where in the carousel it belongs.
-  foreach ($variables['rows'] as $id => $row) {
-    $number = $id + 1 + $view->pager->getOffset();
-    $zebra = ($number % 2 == 0) ? 'even' : 'odd';
-
-    $row_attribute = new Attribute();
-    $row_attribute['class'] = [
-      'jcarousel-item',
-      'jcarousel-item-' . $number,
-      'jcarousel-item-' . $orientation,
-      $zebra
-    ];
-    $variables['row_attributes'][$id] = $row_attribute;
-  }
+  unset($variables['attributes']);
+  $variables += _jcarousel_generate_attributes($variables['rows'], $variables['options']);
+  $variables['items'] = $variables['rows'];
 }
