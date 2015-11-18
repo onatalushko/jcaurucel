@@ -9,42 +9,55 @@
   Drupal.behaviors.jcarousel = {
     attach: function (context) {
       $(context).find('[data-jcarousel]').once('jcarousel').each(function() {
+
+        // Analyze options.
         var options = $(this).data();
         var events = options.events;
         delete options.events;
-
         var autoscroll_options = {};
         for (var option in options) {
-          if (option.indexOf('autoscroll-') == 0) {
-            var param_name = option.replace('autoscroll-', '');
+          if (option.indexOf('autoscroll') == 0) {
+            var param_name = option.replace('autoscroll', '');
             autoscroll_options[param_name] = options[option];
             delete options[option];
           }
         }
 
+        // Init jCarousel.
         var instance = $(this).jcarousel(options);
         Drupal.jcarousel.attachEvents(events, instance);
-        console.log('autoscroll');
-        console.log(autoscroll_options);
-        if (autoscroll_options.length != 0) {
+
+        // Init autoscroll plugin if any autoscroll option available.
+        if (Object.getOwnPropertyNames(autoscroll_options).length > 0) {
           instance.jcarouselAutoscroll(autoscroll_options);
+          Drupal.jcarousel.attachEvents(events, instance);
         }
 
+        // Init control plugin.
+        $(this).siblings('[data-jcarousel-control]').each(function() {
+          var options = $(this).data();
+          var events = options.events;
+          delete options.events;
+          var control = $(this).jcarouselControl(options);
+          Drupal.jcarousel.attachEvents(events, control);
+        });
+
+        instance.on('jcarousel:visiblein', function(event, carousel) {
+          console.log(carousel);
+          var last = carousel.last();
+          var lastIndex  = carousel.index(last);
+          var total      = carousel.list().children('li').size();
+          console.log(lastIndex);
+          console.log(total);
+
+          if (lastIndex == (total - 1)) {
+            console.log('last');
+          }
+
+        });
+
       });
 
-      $(context).find('[data-jcarousel-control]').once('jcarousel').each(function() {
-        var options = $(this).data();
-        var events = options.events;
-        delete options.events;
-        var instance = $(this).jcarouselControl(options);
-        Drupal.jcarousel.attachEvents(events, instance);
-      });
-
-      //  // @todo refactor need.
-      //  // Add standard options required for AJAX functionality.
-      //  //if (options.ajax && !options.itemLoadCallback) {
-      //  //  options.itemLoadCallback = Drupal.jcarousel.ajaxLoadCallback;
-      //  //}
       //
       //  // Add navigation to the carousel if enabled.
       //  if (!callbacks.create) {
@@ -90,6 +103,7 @@
   };
 
   Drupal.jcarousel.reloadCallback = function (event, carousel) {
+    console.log('reload');
     // Set the clip and container to auto width so that they will fill
     // the available space.
     var width = carousel.innerWidth();
@@ -113,69 +127,81 @@
 //    carousel.clip.width(newClipWidth);
 //    carousel.container.width(newContainerWidth);
   };
-
-  Drupal.jcarousel.ajaxLoadCallback = function (jcarousel, state) {
-    // Check if the requested items already exist.
-    if (state == 'init' || jcarousel.has(jcarousel.first, jcarousel.last)) {
-      return;
+  Drupal.jcarousel.animateCallback = function (event, carousel) {
+    console.log('animate');
+  };
+//  Drupal.jcarousel.ajaxLoadCallback = function (jcarousel, state) {
+  Drupal.jcarousel.ajaxLoadCallback = function (event, carousel, target, animate) {
+    console.log('reload');
+    if (typeof carousel.jcarousel('options').ajaxPath == "undefined") {
+      return ;
     }
-
-    var $list = jcarousel.list;
-    var $view = $list.parents('.view:first');
-    var ajaxPath = drupalSettings.jcarousel.ajaxPath;
-    var target = $view.get(0);
-
-    // Find this view's settings in the Views AJAX settings.
-    var settings;
-    $.each(drupalSettings.jcarousel.carousels, function (domID, carouselSettings) {
-      if ($list.is('.' + domID)) {
-        settings = carouselSettings['view_options'];
-      }
-    });
-
-    // Copied from ajax_view.js:
+    // Check if the requested items already exist.
+    console.log(event);
+    console.log(target);
+    console.log(animate);
+    console.log(carousel.jcarousel('options'));
+//    if (state == 'init' || jcarousel.has(jcarousel.first, jcarousel.last)) {
+//      return;
+//    }
+//
+    var $list = carousel.jcarousel('items');
+    var $first = carousel.jcarousel('first');
+    var $last = carousel.jcarousel('last');
+//    var $view = $list.parents('.view:first');
+    var ajaxPath = carousel.jcarousel('options').ajaxPath;
+//      .jcarousel.ajaxPath;
+//    var target = $view.get(0);
+//
+     //Find this view's settings in the Views AJAX settings.
+//    var settings;
+//    $.each(drupalSettings.jcarousel.carousels, function (domID, carouselSettings) {
+//      if ($list.is('.' + domID)) {
+//        settings = carouselSettings['view_options'];
+//      }
+//    });
+//
+    //Copied from ajax_view.js:
     var viewData = {
       'js': 1,
-      'first': jcarousel.first - 1,
-      'last': jcarousel.last
+      'first': $first - 1,
+      'last': $last
     };
-    // Construct an object using the settings defaults and then overriding
-    // with data specific to the link.
-    $.extend(
-      viewData,
-      settings
-    );
-
-    $.ajax({
-      url: ajaxPath,
-      type: 'GET',
-      data: viewData,
-      success: function (response) {
-        Drupal.jcarousel.ajaxResponseCallback(jcarousel, target, response);
-      },
-      error: function (xhr) {
-        Drupal.jcarousel.ajaxErrorCallback(xhr, ajaxPath);
-      },
-      dataType: 'json'
-    });
-
+   // Construct an object using the settings defaults and then overriding
+   // with data specific to the link.
+//   $.extend(
+//     viewData,
+//     settings
+//   );
+//
+//    $.ajax({
+//      url: ajaxPath,
+//      type: 'GET',
+//      data: viewData,
+//      success: function (response) {
+//        Drupal.jcarousel.ajaxResponseCallback(jcarousel, target, response);
+//      },
+//      error: function (xhr) {
+//        Drupal.jcarousel.ajaxErrorCallback(xhr, ajaxPath);
+//      },
+//      dataType: 'json'
+//    });
+//
   };
 
   /**
-  * Init callback for jCarousel. Pauses the carousel when hovering over.
-  */
+   * Init callback for jCarousel. Pauses the carousel when hovering over.
+   */
   Drupal.jcarousel.autoPauseCallback = function (event, carousel) {
     function pauseAuto() {
       carousel.jcarouselAutoscroll('stop');
     }
-
     function resumeAuto() {
       carousel.jcarouselAutoscroll('start');
     }
-
-    carousel.hover(pauseAuto, resumeAuto);
-//    carousel.buttonNext.hover(pauseAuto, resumeAuto);
-//    carousel.buttonPrev.hover(pauseAuto, resumeAuto);
+    if (carousel.jcarouselAutoscroll) {
+      carousel.hover(pauseAuto, resumeAuto);
+    }
   };
 
   /**

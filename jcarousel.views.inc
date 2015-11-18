@@ -150,6 +150,7 @@ function jcarousel_views_add(ViewExecutable $view, $display_id = NULL) {
   // If using AJAX, adjust the view's positioning based on the current page.
   if ($view->ajaxEnabled()) {
     $options['ajax'] = TRUE;
+    $options['ajax_path'] = 'jcarousel/views/ajax?_wrapper_format=drupal_ajax';
 //    $options['size'] = $count;
 
     // Adjusting the query is not necessary.
@@ -170,12 +171,12 @@ function jcarousel_views_add(ViewExecutable $view, $display_id = NULL) {
       // as the middle of an AJAX view.
 //      $options['start'] = ($pager_current_page * $pager_items_per_page) + ($pager_offset + 1);
 //      $options['offset'] = ($pager_current_page * $pager_items_per_page) + ($pager_offset + 1);
-    }
+//    }
 //    elseif ($pager_offset) {
 //      $options['start'] = $pager_offset + 1;
 //      $options['offset'] = $pager_offset + 1;
 //    }
-//  }
+  }
 
   $identifier = Html::cleanCssIdentifier('jcarousel_dom_' . $options['view_options']['jcarousel_dom_id']);
   return jcarousel_add($identifier, $options);
@@ -194,6 +195,17 @@ function template_preprocess_views_view_jcarousel(&$variables) {
 
   // Build the list of classes for the carousel.
   $variables['options'] = $view->getStyle()->options;
+  // If using AJAX, adjust the view's positioning based on the current page.
+  if ($view->ajaxEnabled()) {
+    $variables['options']['ajax'] = TRUE;
+    if (empty($variables['options']['ajax_path'])) {
+      $variables['options']['ajax_path'] = 'jcarousel/views/ajax?_wrapper_format=drupal_ajax';
+    }
+    if (empty($variables['options']['events']['jcarousel']['jcarousel:scroll'])) {
+      $variables['options']['events']['jcarousel']['jcarousel:scroll'] = 'jcarousel.ajaxLoadCallback';
+      $variables['options']['events']['jcarousel']['jcarousel:animateend'] = 'jcarousel.animateCallback';
+    }
+  }
 
   unset($variables['attributes']);
   $variables += _jcarousel_generate_attributes($variables['rows'], $variables['options']);

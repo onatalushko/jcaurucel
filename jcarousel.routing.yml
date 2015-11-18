@@ -5,3 +5,12 @@ jcarousel.config:
     _title: 'jCaroucel configuration'
   requirements:
     _permission: 'administer jcaroucel'
+
+jcarousel.views.ajax:
+  path: 'jcarousel/views/ajax'
+  defaults:
+    _controller: '\Drupal\jcarousel\Controller\JcarouselViewAjaxController::ajaxView'
+  options:
+    _theme: ajax_base_page
+  requirements:
+    _access: 'TRUE'

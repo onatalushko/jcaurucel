@@ -134,7 +134,7 @@ function jcarousel_help($route_name, RouteMatchInterface $route_match) {
       $output .= '<h3>' . t('Different skins') . '</h3>';
       $list_html = '<ul class="differentskin jcarousel-skin-tango">' . $list . '</ul>';
       $output .= '<p>' . t('The "skin" of a carousel can be changed by setting the <code>$options[\'skin\']</code> property. This skin must match one of the skins either provided by a module or matching a skin included in your theme\'s style.css file. Skins are simply a class given to the HTML list with the name "jcarousel-skin-[skin-name]". A custom skin path may be specified in <code>$options[\'skin path\']</code>, or you can use one of these module-based skins:');
-      $skins = jcarousel_skins();
+      $skins = \Drupal::service('jcarousel.skins.manager')->getDefinitions();
       $items = [
         '#theme' => 'item_list',
         '#items' => array_keys($skins),
@@ -303,22 +303,6 @@ function _jcarousel_help_render_gen($images, $options = []) {
   ];
 }
 
-
-
-
-/**
- * Implements hook_menu().
- */
-//function jcarousel_menu() {
-//  $items['jcarousel/ajax/views'] = array(
-//    'page callback' => 'jcarousel_views_ajax',
-//    'access callback' => TRUE,
-//    'file' => 'includes/jcarousel.views.inc',
-//    'type' => MENU_CALLBACK,
-//  );
-//  return $items;
-//}
-
 /**
  * Implements hook_theme().
  */
@@ -385,16 +369,6 @@ function jcarousel_add($class_name = NULL, $options = [], $add = TRUE) {
   }
 
   return $attachments;
-}
-
-/**
- * Returns a list of all available jCarousel skins.
- *
- * @return array
- *   Keyed array of skins.
- */
-function jcarousel_skins() {
-  return \Drupal::service('jcarousel.skins.manager')->getDefinitions();
 }
 
 /**
@@ -517,6 +491,12 @@ function _jcarousel_generate_attributes($items, $options) {
   if ($options['wrap']) {
     $attributes['attributes']->setAttribute('data-wrap', $options['wrap']);
   }
+
+  if ($options['ajax']) {
+    $attributes['attributes']->setAttribute('data-ajax', 'true');
+    $attributes['attributes']->setAttribute('data-ajax-path', $options['ajax_path']);
+  }
+
   if ($options['vertical']) {
     $attributes['attributes']->setAttribute('data-vertical', 'true');
   }
@@ -578,7 +558,7 @@ function jcarousel_page_attachments(&$page) {
     // Allow other modules to modify these settings.
     \Drupal::moduleHandler()->alter('jcarousel_options', $options, $class_name);
 
-    $skins = jcarousel_skins();
+    $skins = \Drupal::service('jcarousel.skins.manager')->getDefinitions();
 
     foreach ($skins as $id => $skin) {
       $variables['#attached']['library'][] = 'jcarousel/skin.' . $id;
