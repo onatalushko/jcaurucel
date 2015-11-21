@@ -85,116 +85,15 @@ function jcarousel_views_ajax() {
   }
 }
 
-/**
- * Adds necessary CSS and JS for Views-based carousels.
- */
-function jcarousel_views_add(ViewExecutable $view, $display_id = NULL) {
-  static $dom_counter = 0;
-
-  if (!isset($display_id)) {
-    $display_id = empty($view->current_display) ? 'default' : $view->current_display;
-  }
-
-  // Save the settings for the carousel, these will be used by the JavaScript.
-  $options = [];
-
-  // Keep track of each settings addition and give a unique ID. This can be
-  // useful when displaying the same view multiple times with different
-  // arguments (i.e. such as in a panel).
-  $options['view_options'] = [
-    'view_args' => Html::escape(implode('/', $view->args)),
-    'view_path' => $view->getPath(),
-    'view_base_path' => Url::fromRoute('<current>')->toString(),
-    'view_display_id' => $display_id,
-    'view_name' => $view->storage->id(),
-    'jcarousel_dom_id' => isset($view->jcarousel_dom_id) ? $view->jcarousel_dom_id : ++$dom_counter,
-  ];
-
-  foreach ($view->getStyle()->options as $key => $option) {
-    if ($option) {
-      $options[$key] = is_numeric($option) ? (int) $option : $option;
-    }
-  }
-
-  // By default limit the scrolling to the same number of items as are visible
-  // to avoid display glitches.
-  if (empty($options['scroll']) && !empty($options['visible'])) {
-    $options['scroll'] = $options['visible'];
-  }
-
-  // Get the total number of items in this view.
-  $count_query = $view->build_info['count_query']->countQuery();
-  $count = $count_query->execute()->fetchField();
-
-  // Views may already populate total_rows later, but since we've already
-  // generated this value, we might as well make it available.
-  $view->total_rows = $count;
-
-  // If there is just one item disable the auto-scroll and rotation.
-  if ($count == 1) {
-    $options['wrap'] = NULL;
-    $options['auto'] = 0;
-  }
-
-  // Calculate proper value for start if a negative value was chosen.
-  if ($options['start'] < 0) {
-    $options['start'] += $count + 1;
-  }
-
-  // Determine AJAX functionality in a backwards-compatible way. Versions prior
-  // to jCarousel 2.6 used the view-level "Use AJAX" option instead of a style
-  // setting. We check $view->style_options here intentionally instead of
-  // $view->style_plugin->options.
-//  $use_ajax = isset($view->getStyle()->options['ajax']) ? $view->getStyle()->options['ajax'] : $view->ajaxEnabled();
-
-  // If using AJAX, adjust the view's positioning based on the current page.
-  if ($view->ajaxEnabled()) {
-    $options['ajax'] = TRUE;
-    $options['ajax_path'] = 'jcarousel/views/ajax?_wrapper_format=drupal_ajax';
-//    $options['size'] = $count;
-
-    // Adjusting the query is not necessary.
-//    $view->build($display_id);
-
-    // Create generic variable names.
-//    $pager_current_page = $view->getCurrentPage();
-//    $pager_items_per_page = $view->getItemsPerPage();
-//    $pager_offset = $view->getOffset();
-
-    // If starting in the middle of a view, initialize the carousel at that
-    // position. Strangely the carousel must pre-load empty LI items all the way
-    // up until the active item, making this inefficient for large lists.
-//    if ($pager_current_page) {
-      // TODO: Pagers and carousels do not work well together. jCarousel should
-      // give items the class "jcarousel-item-[offset]", but instead it always
-      // starts with "1", making it impossible to define a prepopulated list
-      // as the middle of an AJAX view.
-//      $options['start'] = ($pager_current_page * $pager_items_per_page) + ($pager_offset + 1);
-//      $options['offset'] = ($pager_current_page * $pager_items_per_page) + ($pager_offset + 1);
-//    }
-//    elseif ($pager_offset) {
-//      $options['start'] = $pager_offset + 1;
-//      $options['offset'] = $pager_offset + 1;
-//    }
-  }
-
-  $identifier = Html::cleanCssIdentifier('jcarousel_dom_' . $options['view_options']['jcarousel_dom_id']);
-  return jcarousel_add($identifier, $options);
-}
-
 /*
  * Preprocess function for views-view-jcarousel.html.twig.
  */
 function template_preprocess_views_view_jcarousel(&$variables) {
   $view = &$variables['view'];
-  $display_id = empty($view->current_display) ? 'default' : $view->current_display;
-
-  // Add necessary JavaScript and CSS.
-  $attachments = jcarousel_views_add($view, $display_id);
-  $view->element['#attached'] = NestedArray::mergeDeep($view->element['#attached'], $attachments);
+  $variables['options'] = $view->style_plugin->options;
 
   // Build the list of classes for the carousel.
-  $variables['options'] = $view->getStyle()->options;
+  // $variables['options'] = $view->getStyle()->options;
   // If using AJAX, adjust the view's positioning based on the current page.
   if ($view->ajaxEnabled()) {
     $variables['options']['ajax'] = TRUE;

@@ -7,6 +7,7 @@
 
 namespace Drupal\jcarousel\Plugin\views\style;
 
+use Drupal\Component\Utility\NestedArray;
 use Drupal\views\Plugin\views\style;
 use Drupal\Core\Form\FormStateInterface;
 
@@ -64,7 +65,7 @@ class jcarousel extends style\StylePluginBase {
 
   /**
    * Returns keyed array of jCarousel skins.
-   * 
+   *
    * @return array
    *   Keys array of skins
    */
@@ -218,4 +219,16 @@ class jcarousel extends style\StylePluginBase {
     }
     return $errors;
   }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function preRender($result) {
+    parent::preRender($result);
+
+    $skin = !empty($this->options['skin']) ? $this->options['skin'] : 'default';
+    $this->view->element['#attached']['library'][] = 'jcarousel/jcarousel';
+    $this->view->element['#attached']['library'][] = 'jcarousel/skin.' . $skin;
+  }
+
 }

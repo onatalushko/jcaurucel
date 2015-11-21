@@ -128,7 +128,7 @@ function jcarousel_help($route_name, RouteMatchInterface $route_match) {
       $output .= $renderer->render($sample);
 
       $output .= $list_html;
-      jcarousel_add('verticalcarousel', ['vertical' => TRUE]);
+      jcarousel_add(['vertical' => TRUE]);
 
       // Provide the different skins carousel demonstration.
       $output .= '<h3>' . t('Different skins') . '</h3>';
@@ -154,7 +154,7 @@ function jcarousel_help($route_name, RouteMatchInterface $route_match) {
       $output .= $renderer->render($sample);
 
       $output .= $list_html;
-      jcarousel_add('differentskin', ['skin' => 'tango']);
+      jcarousel_add(['skin' => 'tango']);
 
       // Another thing you can do is use the theme('jcarousel') function.
       $output .= '<h3>' . t('Theme function') . '</h3>';
@@ -332,41 +332,39 @@ function jcarousel_theme() {
  * @return
  *   An array of JS and CSS files, suitable for inclusion as an #attached array.
  */
-function jcarousel_add($class_name = NULL, $options = [], $add = TRUE) {
+function jcarousel_add($options = []) {
   static $library_added;
 
   // Add the jCarousel library and any global settings.
   $attachments['library'][] = 'jcarousel/jcarousel';
 
-  if (isset($class_name)) {
+//  if (isset($class_name)) {
     // Set default options.
-    $options += [
-      'skin' => 'default',
-      'selector' => '.' . $class_name,
-    ];
-    if (!empty($options['skin'])) {
-      $attachments['library'][] = 'jcarousel/skin.' . $options['skin'];
-    }
+  $options += [
+    'skin' => 'default',
+  ];
+  $attachments['library'][] = 'jcarousel/skin.' . $options['skin'];
+
 
     // Allow other modules to modify these settings.
     \Drupal::moduleHandler()->alter('jcarousel_options', $options, $class_name);
 
-    // Add settings for this individual carousel.
-    if (!isset($library_added[$class_name]) || !$add) {
-      $library_added[$class_name] = TRUE;
-
-      // Add the JavaScript settings for this carousel.
-      $js_settings = [
-        'jcarousel' => [
-          'carousels' => [
-            $class_name => $options,
-          ],
-        ],
-      ];
-
-      $attachments['drupalSettings'] = $js_settings;
-    }
-  }
+//    // Add settings for this individual carousel.
+//    if (!isset($library_added[$class_name]) || !$add) {
+//      $library_added[$class_name] = TRUE;
+//
+//      // Add the JavaScript settings for this carousel.
+//      $js_settings = [
+//        'jcarousel' => [
+//          'carousels' => [
+//            $class_name => $options,
+//          ],
+//        ],
+//      ];
+//
+//      $attachments['drupalSettings'] = $js_settings;
+//    }
+//  }
 
   return $attachments;
 }
