@@ -7,7 +7,6 @@
 
 namespace Drupal\jcarousel\Plugin\views\style;
 
-use Drupal\Component\Utility\NestedArray;
 use Drupal\views\Plugin\views\style;
 use Drupal\Core\Form\FormStateInterface;
 

@@ -85,28 +85,4 @@ function jcarousel_views_ajax() {
   }
 }
 
-/*
- * Preprocess function for views-view-jcarousel.html.twig.
- */
-function template_preprocess_views_view_jcarousel(&$variables) {
-  $view = &$variables['view'];
-  $variables['options'] = $view->style_plugin->options;
 
-  // Build the list of classes for the carousel.
-  // $variables['options'] = $view->getStyle()->options;
-  // If using AJAX, adjust the view's positioning based on the current page.
-  if ($view->ajaxEnabled()) {
-    $variables['options']['ajax'] = TRUE;
-    if (empty($variables['options']['ajax_path'])) {
-      $variables['options']['ajax_path'] = 'jcarousel/views/ajax?_wrapper_format=drupal_ajax';
-    }
-    if (empty($variables['options']['events']['jcarousel']['jcarousel:scroll'])) {
-      $variables['options']['events']['jcarousel']['jcarousel:scroll'] = 'jcarousel.ajaxLoadCallback';
-      $variables['options']['events']['jcarousel']['jcarousel:animateend'] = 'jcarousel.animateCallback';
-    }
-  }
-
-  unset($variables['attributes']);
-  $variables += _jcarousel_generate_attributes($variables['rows'], $variables['options']);
-  $variables['items'] = $variables['rows'];
-}
