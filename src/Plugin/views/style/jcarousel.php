@@ -213,10 +213,10 @@ class jcarousel extends style\StylePluginBase {
    */
   public function validateOptionsForm(&$form, FormStateInterface $form_state) {
     $errors = parent::validateOptionsForm($form, $form_state);
-    if ($this->view->usePager()) {
-      $errors[] = t('The jCarousel style cannot be used with a pager. Disable the "Use pager" option for this display.');
+    $display = $this->view->getDisplay();
+    $pager = $display->getPlugin('pager');
+    if ($pager->usePager() && !in_array($pager->getPluginId(), ['none', 'jcarousel'])) {
     }
-    return $errors;
   }
 
   /**

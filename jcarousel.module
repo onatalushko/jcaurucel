@@ -448,18 +448,25 @@ function template_preprocess_jcarousel(&$variables) {
 function template_preprocess_views_view_jcarousel(&$variables) {
   $view = &$variables['view'];
   $variables['options'] = $view->style_plugin->options;
+  $position = array_search('jcarousel/jcarousel', $view->element['#attached']['library']);
+  $library = array_splice($view->element['#attached']['library'], $position, 1);
+  $view->element['#attached']['library'] = array_merge($view->element['#attached']['library'], $library);
 
   // Build the list of classes for the carousel.
   // $variables['options'] = $view->getStyle()->options;
   // If using AJAX, adjust the view's positioning based on the current page.
   if ($view->ajaxEnabled()) {
+    if ($view->pager->total_items < PHP_INT_MAX / 2) {
+      // @todo ajax load should be detached.
+    }
     $variables['options']['ajax'] = TRUE;
     if (empty($variables['options']['ajax_path'])) {
       $variables['options']['ajax_path'] = 'jcarousel/views/ajax?_wrapper_format=drupal_ajax';
     }
     if (empty($variables['options']['events']['jcarousel']['jcarousel:scroll'])) {
       $variables['options']['events']['jcarousel']['jcarousel:scroll'] = 'jcarousel.ajaxLoadCallback';
-      $variables['options']['events']['jcarousel']['jcarousel:animateend'] = 'jcarousel.animateCallback';
+//      $variables['options']['events']['jcarousel']['jcarousel:animateend'] = 'jcarousel.animateCallback';
+//      $variables['options']['events']['jcarouselcontrol']['jcarouselcontrol:inactive'] = 'jcarousel.inactiveCallback';
     }
   }
 
@@ -551,6 +558,7 @@ function _jcarousel_generate_attributes($items, $options) {
   }
   $attributes['attributes_next']->setAttribute('data-target', '+=' . $scroll);
   $attributes['attributes_next']->addClass('jcarousel-control-next');
+
 
   $attributes['attributes_wrapper']->addClass('jcarousel-' . $orientation);
 

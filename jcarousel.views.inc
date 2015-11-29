@@ -84,5 +84,3 @@ function jcarousel_views_ajax() {
     drupal_json_output($object);
   }
 }
-
-
