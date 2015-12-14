@@ -42,8 +42,13 @@
           Drupal.jcarousel.attachEvents(events, control);
         });
 
-        instance.on('jcarousel:visiblein', function(event, carousel) {
+        instance.on('jcarousel:visiblein', 'li', function(event, carousel) {
+
+          console.log('jcarousel:visiblein start');
+          console.log(event);
           console.log(carousel);
+          console.log('jcarousel:visiblein end');
+
 
 
         });
@@ -353,6 +358,7 @@
         if (isNaN(this.element_settings.submit.page)) {
           this.element_settings.submit.page = 1;
         }
+        console.log(this.element_settings);
         //this.element_settings.success = onSuccess;
       }
 
@@ -364,16 +370,20 @@
         element: $link
       });
       self_settings.submit.page = this.element_settings.submit.page;
+      if (jCarousel.length && this.element_settings.submit.stop_preload) {
+        return false;
+      }
+
       this.pagerAjax = Drupal.ajax(self_settings);
     };
 
-    /**
-     * Attach the ajax behavior to each link.
-     */
-    Drupal.views.ajaxView.prototype.attachPagerAjax = function () {
-      this.$view.find('ul.js-pager__items > li > a, th.views-field a, .attachment .views-summary a, a.jcarousel-control-next')
-        .each(jQuery.proxy(this.attachPagerLinkAjax, this));
-    };
+    ///**
+    // * Attach the ajax behavior to each link.
+    // */
+    //  Drupal.views.ajaxView.prototype.attachPagerAjax = function () {
+    //  this.$view.find('ul.js-pager__items > li > a, th.views-field a, .attachment .views-summary a, a.jcarousel-control-next')
+    //    .each(jQuery.proxy(this.attachPagerLinkAjax, this));
+    //};
   }
 
   /**
@@ -408,7 +418,6 @@
   Drupal.AjaxCommands.prototype.jcarousel_append = function(ajax, response, status) {
     // Get information from the response. If it is not there, default to
     // our presets.
-    console.log(response.data);
     var wrapper = response.selector ? $(response.selector + ' .jcarousel-wrapper') : $(ajax.wrapper + ' .jcarousel-wrapper');
     var slide_parent = wrapper.find('ul');
     var jCarousel = wrapper.find('[data-jcarousel]');
@@ -478,12 +487,14 @@
       ajax.element_settings.submit.page++;
     }
 
-    if (response.stop_preload) {
-      control.jcarouselControl('destroy');
-      // Unbind ajax preload.
-      control.unbind('click');
-      control.jcarouselControl(control_options);
-    }
+    ajax.element_settings.submit.stop_preload = response.stop_preload;
+
+    //if (response.stop_preload) {
+    //  control.jcarouselControl('destroy');
+    //  // Unbind ajax preload.
+    //  control.unbind('click');
+    //  control.jcarouselControl(control_options);
+    //}
 
   }
 
