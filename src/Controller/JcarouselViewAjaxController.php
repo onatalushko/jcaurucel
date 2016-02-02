@@ -105,8 +105,11 @@ class JcarouselViewAjaxController extends ViewAjaxController implements Containe
             BubbleableMetadata::createFromRenderArray($rendered_row)
               ->merge($bubbleable_metadata)
               ->applyTo($rendered_row);
-            $stop_preload = $view->pager->total_items < PHP_INT_MAX / 2 ? TRUE : FALSE;
-            $response->addCommand(new JcarouselAppendCommand(".js-view-dom-id-$dom_id", $rendered_row, NULL, $stop_preload));
+            $next_page = NULL;
+            if ($view->pager->total_items == PHP_INT_MAX / 2) {
+              $next_page = $view->getCurrentPage() + 1;
+            }
+            $response->addCommand(new JcarouselAppendCommand(".js-view-dom-id-$dom_id", $rendered_row, array('next_page' => $next_page)));
           }
         }
 

@@ -49,7 +49,6 @@ class jcarousel extends style\StylePluginBase {
     $options['easing'] = ['default' => NULL];
     $options['vertical'] = ['default' => FALSE];
     $options['navigation'] = ['default' => ''];
-    $options['ajax'] = ['default' => 0];
     return $options;
   }
 
@@ -156,12 +155,6 @@ class jcarousel extends style\StylePluginBase {
       ),
       '#default_value' => $this->options['navigation'],
       '#description' => t('Enable a clickable navigation list to jump straight to a given page.'),
-    );
-    $form['ajax'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('AJAX load pages'),
-      '#default_value' => $this->options['ajax'],
-      '#description' => t('The number of items set in the pager settings will be preloaded. All additional pages will be loaded by AJAX as needed.'),
     );
 
     $form['advanced'] = array(

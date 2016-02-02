@@ -452,21 +452,20 @@ function template_preprocess_views_view_jcarousel(&$variables) {
   $library = array_splice($view->element['#attached']['library'], $position, 1);
   $view->element['#attached']['library'] = array_merge($view->element['#attached']['library'], $library);
 
+  $variables['options']['preload_page'] = 0;
   // Build the list of classes for the carousel.
   // $variables['options'] = $view->getStyle()->options;
   // If using AJAX, adjust the view's positioning based on the current page.
-  if ($view->ajaxEnabled()) {
-    if ($view->pager->total_items < PHP_INT_MAX / 2) {
-      // @todo ajax load should be detached.
-    }
-    $variables['options']['ajax'] = TRUE;
-    if (empty($variables['options']['ajax_path'])) {
-      $variables['options']['ajax_path'] = 'jcarousel/views/ajax?_wrapper_format=drupal_ajax';
-    }
-    if (empty($variables['options']['events']['jcarousel']['jcarousel:scroll'])) {
-      $variables['options']['events']['jcarousel']['jcarousel:scroll'] = 'jcarousel.ajaxLoadCallback';
-//      $variables['options']['events']['jcarousel']['jcarousel:animateend'] = 'jcarousel.animateCallback';
-//      $variables['options']['events']['jcarouselcontrol']['jcarouselcontrol:inactive'] = 'jcarousel.inactiveCallback';
+  if ($view->ajaxEnabled() && $view->usePager()) {
+    if ($view->pager->getPluginId() == 'jcarousel_pager') {
+      if ($view->pager->total_items == PHP_INT_MAX / 2) {
+        // Attach preload.
+        $variables['options']['preload_page'] = $view->getCurrentPage() + 1;
+      }
+      $variables['options']['ajax'] = TRUE;
+      if (empty($variables['options']['ajax_path'])) {
+        $variables['options']['ajax_path'] = 'jcarousel/views/ajax?_wrapper_format=drupal_ajax';
+      }
     }
   }
 
@@ -553,6 +552,9 @@ function _jcarousel_generate_attributes($items, $options) {
   $attributes['attributes_previous']->addClass('jcarousel-control-prev');
 
   $attributes['attributes_next']->setAttribute('data-jcarousel-control', 'true');
+  if ($options['preload_page'] != 0) {
+    $attributes['attributes_next']->setAttribute('data-preload-page', $options['preload_page']);
+  }
   if (!empty($options['events']['jcarouselcontrol'])) {
     $attributes['attributes_next']->setAttribute('data-events', Json::encode($options['events']['jcarouselcontrol']));
   }

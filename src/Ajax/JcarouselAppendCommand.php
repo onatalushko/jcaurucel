@@ -64,11 +64,10 @@ class JcarouselAppendCommand implements CommandInterface, CommandWithAttachedAss
   /**
    * {@inheritdoc}
    */
-  public function __construct($selector, $content, array $settings = NULL, $stop_preload = FALSE) {
+  public function __construct($selector, $content, array $settings = NULL) {
     $this->selector = $selector;
     $this->content = $content;
     $this->settings = $settings;
-    $this->stop_preload = $stop_preload;
   }
 
   /**
@@ -82,7 +81,6 @@ class JcarouselAppendCommand implements CommandInterface, CommandWithAttachedAss
       'selector' => $this->selector,
       'data' => $this->getRenderedContent(),
       'settings' => $this->settings,
-      'stop_preload' => $this->stop_preload,
     );
   }
 

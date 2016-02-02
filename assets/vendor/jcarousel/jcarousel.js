@@ -39,44 +39,46 @@
           var events = options.events;
           delete options.events;
           var control = $(this).jcarouselControl(options);
+
+          if ($(control).closest('[class*="js-view-dom-id-"]').length > 0) {
+            // Preload next page.
+            var preload_page = $(this).data('preload-page') || false;
+            if ($(this).hasClass('jcarousel-control-next') && preload_page) {
+              var classes  = $(this).closest('[class*="js-view-dom-id-"]').attr('class');
+              var views_id = classes.split(' ').filter(function(element){
+                return element.split('js-view-dom-id-').length == 2;
+              });
+
+              var views_dom_id = '';
+              if (views_id.length == 1) {
+                views_dom_id = 'views_dom_id:' + views_id[0].split('js-view-dom-id-')[1];
+              }
+
+              var viewData = drupalSettings.views.ajaxViews[views_dom_id] || {};
+              var pager = {page : preload_page};
+              $.extend(
+                viewData,
+                pager
+              );
+
+              var  element_settings = {
+                url: drupalSettings.path.baseUrl + 'jcarousel/views/ajax',
+                base: views_dom_id,
+                event: 'jcarouselcontrol:inactive',
+                progress: {
+                  type: 'jcarousel'
+                },
+                submit: viewData,
+                element: this
+              };
+
+              Drupal.ajax(element_settings);
+            }
+          }
           Drupal.jcarousel.attachEvents(events, control);
         });
 
-        instance.on('jcarousel:visiblein', 'li', function(event, carousel) {
-
-          console.log('jcarousel:visiblein start');
-          console.log(event);
-          console.log(carousel);
-          console.log('jcarousel:visiblein end');
-
-
-
-        });
-
       });
-
-      //
-      //  // Add navigation to the carousel if enabled.
-      //  if (!callbacks.create) {
-      //    $carousel.on('jcarousel:create', function(event, carousel) {
-      //      console.log(event);
-      //      console.log(carousel);
-      //      console.log('jcarousel:create triggered');
-      //      Drupal.jcarousel.createCarousel(event, carousel);
-      //        //if (options.navigation) {
-      //        //  Drupal.jcarousel.addNavigation(carousel, options.navigation);
-      //        //}
-      //        if (options.responsive) {
-      //          carousel.reload();
-      //        }
-      //      if (options.navigation && !options.itemVisibleInCallback) {
-      //        options.itemLastInCallback = {
-      //          onAfterAnimation: Drupal.jcarousel.updateNavigationActive
-      //        };
-      //      }
-      //    });
-      //  }
-
     }
   };
 
@@ -124,86 +126,6 @@
 //    carousel.clip.width(newClipWidth);
 //    carousel.container.width(newContainerWidth);
   };
-  Drupal.jcarousel.animateCallback = function (event, carousel) {
-    console.log('animate');
-  };
-  Drupal.jcarousel.inactiveCallback = function (event, carousel) {
-    console.log('inactive');
-    console.log(event);
-    console.log(carousel);
-  };
-//  Drupal.jcarousel.ajaxLoadCallback = function (jcarousel, state) {
-  Drupal.jcarousel.ajaxLoadCallback = function (event, carousel, target, animate) {
-    console.log('scroll');
-    if (typeof carousel.jcarousel('options').ajaxPath == "undefined") {
-      return ;
-    }
-    // Check if the requested items already exist.
-    console.log(event);
-    console.log(target);
-    console.log(animate);
-    console.log(carousel.jcarousel('options'));
-//    if (state == 'init' || jcarousel.has(jcarousel.first, jcarousel.last)) {
-//      return;
-//    }
-//
-//    var $list = carousel.jcarousel('items').size();
-//    console.log($list);
-//    var $first = carousel.jcarousel('first');
-//    var $last = carousel.jcarousel('last');
-//    var $view = $list.parents('.view:first');
-    var ajaxPath = carousel.jcarousel('options').ajaxPath;
-
-    var last = carousel.last();
-    var lastIndex  = carousel.index(last);
-    var total      = carousel.jcarousel('items').size();
-    console.log(lastIndex);
-    console.log(total);
-
-    if (lastIndex == (total - 1)) {
-      console.log('last');
-      //Drupal.views.ajaxView.attachPagerLinkAjax('1','link');
-    }
-
-
-//      .jcarousel.ajaxPath;
-//    var target = $view.get(0);
-//
-     //Find this view's settings in the Views AJAX settings.
-//    var settings;
-//    $.each(drupalSettings.jcarousel.carousels, function (domID, carouselSettings) {
-//      if ($list.is('.' + domID)) {
-//        settings = carouselSettings['view_options'];
-//      }
-//    });
-//
-    //Copied from ajax_view.js:
-    //var viewData = {
-    //  'js': 1,
-    //  'first': $first - 1,
-    //  'last': $last
-    //};
-   // Construct an object using the settings defaults and then overriding
-   // with data specific to the link.
-//   $.extend(
-//     viewData,
-//     settings
-//   );
-//
-//    $.ajax({
-//      url: ajaxPath,
-//      type: 'GET',
-//      data: viewData,
-//      success: function (response) {
-//        Drupal.jcarousel.ajaxResponseCallback(jcarousel, target, response);
-//      },
-//      error: function (xhr) {
-//        Drupal.jcarousel.ajaxErrorCallback(xhr, ajaxPath);
-//      },
-//      dataType: 'json'
-//    });
-//
-  };
 
   /**
    * Init callback for jCarousel. Pauses the carousel when hovering over.
@@ -219,172 +141,6 @@
       carousel.hover(pauseAuto, resumeAuto);
     }
   };
-
-  /**
-  * Setup callback for jCarousel. Calculates number of pages.
-  */
-  Drupal.jcarousel.createCarousel = function (event, carousel) {
-    console.log('create');
-    // Determine the number of pages this carousel includes.
-    // This only works for a positive starting point. Also, .first is 1-based
-    // while .last is a count, so we need to reset the .first number to be
-    // 0-based to make the math work.
-    carousel.pageSize = carousel.last - (carousel.first - 1);
-
-    // jCarousel's Views integration sets "size" in the carousel options. Use that
-    // if available, otherwise count the number of items in the carousel.
-    var itemCount = carousel.options.size ? carousel.options.size : $(carousel.list).children('li').length;
-    carousel.pageCount = Math.ceil(itemCount / carousel.pageSize);
-    carousel.pageNumber = 1;
-
-    // Disable the previous/next arrows if there is only one page.
-    if (carousel.options.wrap != 'circular' && carousel.pageCount == 1) {
-      carousel.buttons(false, false);
-    }
-  };
-
- /**
-  * itemVisibleInCallback for jCarousel. Update the navigation after page change.
-  */
-  Drupal.jcarousel.updateNavigationActive = function (carousel, item, idx, state) {
-    // The navigation doesn't even exist yet when this is called on init.
-    var $listItems = $(carousel.list).parents('.jcarousel-container:first').find('.jcarousel-navigation li');
-    if ($listItems.length == 0) {
-      return;
-    }
-
-    // jCarousel does some very odd things with circular wraps. Items before the
-    // first item are given negative numbers and items after the last are given
-    // numbers beyond the total number of items. This complicated logic calculates
-    // which page number is active based off this numbering scheme.
-    var pageNumber = Math.ceil(idx / carousel.pageSize);
-    if (pageNumber <= 0 || pageNumber > carousel.pageCount) {
-      pageNumber = pageNumber % carousel.pageCount;
-      pageNumber = pageNumber == 0 ? carousel.pageCount : pageNumber;
-      pageNumber = pageNumber < 0 ? pageNumber + carousel.pageCount : pageNumber;
-    }
-    carousel.pageNumber = pageNumber;
-    var currentPage = $listItems.get(carousel.pageNumber - 1);
-
-    // Set the current page to be active.
-    $listItems.not(currentPage).removeClass('active');
-    $(currentPage).addClass('active');
-  }
-
-  /**
-  * AJAX callback for all jCarousel-style views.
-  */
-  Drupal.jcarousel.ajaxResponseCallback = function (jcarousel, target, response) {
-    if (response.debug) {
-      alert(response.debug);
-    }
-
-    var $view = $(target);
-    var jcarousel = $view.find('ul.jcarousel').data('jcarousel');
-
-    // Add items to the jCarousel.
-    $('ul.jcarousel > li', response.display).each(function (i) {
-      var itemNumber = this.className.replace(/.*?jcarousel-item-(\d+).*/, '$1');
-      jcarousel.add(itemNumber, this.innerHTML);
-    });
-
-    // Add Drupal behaviors to the content of the carousel to affect new items.
-    Drupal.attachBehaviors(jcarousel.list.get(0));
-
-    // Treat messages the same way that Views typically handles messages.
-    if (response.messages) {
-      // Show any messages (but first remove old ones, if there are any).
-      $view.find('.views-messages').remove().end().prepend(response.messages);
-    }
-  };
-
-  /**
-  * Display error messages using the same mechanism as Views module.
-  */
-  Drupal.jcarousel.ajaxErrorCallback = function (xhr, path) {
-    var error_text = '';
-
-    if ((xhr.status == 500 && xhr.responseText) || xhr.status == 200) {
-      error_text = xhr.responseText;
-
-      // Replace all &lt; and &gt; by < and >
-      error_text = error_text.replace("/&(lt|gt);/g", function (m, p) {
-        return (p == "lt") ? "<" : ">";
-      });
-
-      // Now, replace all html tags by empty spaces
-      error_text = error_text.replace(/<("[^"]*"|'[^']*'|[^'">])*>/gi, "");
-
-      // Fix end lines
-      error_text = error_text.replace(/[\n]+\s+/g, "\n");
-    }
-    else {
-      if (xhr.status == 500) {
-        error_text = xhr.status + ': ' + Drupal.t("Internal server error. Please see server or PHP logs for error information.");
-      }
-      else {
-        error_text = xhr.status + ': ' + xhr.statusText;
-      }
-    }
-
-    alert(Drupal.t("An error occurred at @path.\n\nError Description: @error", {
-      '@path': path,
-      '@error': error_text
-    }));
-  };
-  console.log('00');
-  console.log(Drupal.views);
-
-  if (typeof Drupal.views != 'undefined') {
-    Drupal.views.ajaxView.prototype.attachPagerLinkAjax = function (id, link) {
-      var $link = $(link);
-      var viewData = {};
-      var href = $link.attr('href');
-      // Construct an object using the settings defaults and then overriding
-      // with data specific to the link.
-      $.extend(
-        viewData,
-        this.settings,
-        Drupal.Views.parseQueryString(href),
-        // Extract argument data from the URL.
-        Drupal.Views.parseViewArgs(href, this.settings.view_base_path)
-      );
-
-      var jCarousel = $(this.element_settings.selector).find('[data-jcarousel]');
-      console.log(jCarousel);
-      if (jCarousel.length) {
-        this.element_settings.url = drupalSettings.path.baseUrl + 'jcarousel/views/ajax';
-        this.element_settings.progress.type = 'jcarousel';
-        if (isNaN(this.element_settings.submit.page)) {
-          this.element_settings.submit.page = 1;
-        }
-        console.log(this.element_settings);
-        //this.element_settings.success = onSuccess;
-      }
-
-      console.log('page');
-      console.log(this.element_settings.submit.page);
-      var self_settings = $.extend({}, this.element_settings, {
-        submit: viewData,
-        base: false,
-        element: $link
-      });
-      self_settings.submit.page = this.element_settings.submit.page;
-      if (jCarousel.length && this.element_settings.submit.stop_preload) {
-        return false;
-      }
-
-      this.pagerAjax = Drupal.ajax(self_settings);
-    };
-
-    ///**
-    // * Attach the ajax behavior to each link.
-    // */
-    //  Drupal.views.ajaxView.prototype.attachPagerAjax = function () {
-    //  this.$view.find('ul.js-pager__items > li > a, th.views-field a, .attachment .views-summary a, a.jcarousel-control-next')
-    //    .each(jQuery.proxy(this.attachPagerLinkAjax, this));
-    //};
-  }
 
   /**
    * Sets the throbber progress indicator.
@@ -476,26 +232,18 @@
 
     // Reload jCarousel and scroll it forward.
     jCarousel.jcarousel('reload');
-    jCarousel.jcarousel('scroll', control_options.target);
 
-
-    console.log(ajax);
     if (isNaN(ajax.element_settings.submit.page)) {
       ajax.element_settings.submit.page = 1;
     }
     else {
-      ajax.element_settings.submit.page++;
+      if (response.settings.next_page == null) {
+        control.off('jcarouselcontrol:inactive');
+      }
+      else {
+        ajax.element_settings.submit.page = response.settings.next_page;
+      }
     }
-
-    ajax.element_settings.submit.stop_preload = response.stop_preload;
-
-    //if (response.stop_preload) {
-    //  control.jcarouselControl('destroy');
-    //  // Unbind ajax preload.
-    //  control.unbind('click');
-    //  control.jcarouselControl(control_options);
-    //}
-
   }
 
 })(jQuery, Drupal, window, drupalSettings);
