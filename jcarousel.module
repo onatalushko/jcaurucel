@@ -9,6 +9,7 @@ use Drupal\Core\Template\Attribute;
 use Drupal\jcarousel;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Component\Serialization\Json;
+use Drupal\Core\Url;
 
 /**
  * Implements hook_help().
@@ -32,7 +33,7 @@ function jcarousel_help($route_name, RouteMatchInterface $route_match) {
       $output .= '<h2>' . t('Views integration') . '</h2>';
       $output .= '<p>';
       $output .= t('Most configuration options for the jCarousel module are provided through <a href=":views">Views module</a>.',
-        [':views' => $module_handler->moduleExists('views') ? \Drupal::url('help.page', ['name' => 'views']) : '#']
+        [':views' => $module_handler->moduleExists('views') ? Url::fromRoute('help.page', ['name' => 'views']) : '#']
       );
       if ($module_handler->moduleExists('views_ui')) {
         $output .= ' ' . t('You may configure a new view through the <a href=":views-url">Views module interface</a>. After adding a new view, change its "Display style" to "jCarousel" and configure the remaining options there. When using the jCarousel display style with Views, you can construct any of the examples on this page as well as dynamically loaded carousels through AJAX requests.',
@@ -85,7 +86,7 @@ function jcarousel_help($route_name, RouteMatchInterface $route_match) {
       $output .= $renderer->render($sample);
 
       $output .= $list_html;
-      jcarousel_add('horizontalcarousel');
+      jcarousel_add();
 
 
       // Provide the vertical carousel demonstration.
@@ -230,7 +231,6 @@ function jcarousel_help($route_name, RouteMatchInterface $route_match) {
       // Provide a circular wrap element.
       $output .= '<h3>' . t('Circular wrap') . '</h3>';
       $output .= '<p>' . t('This example puts the carousel into a circular wrap.') . '</p>';
-
 
       $options = [
         'wrap' => 'circular',

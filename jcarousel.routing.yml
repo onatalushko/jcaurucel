@@ -1,7 +1,7 @@
 jcarousel.config:
   path: '/admin/config/jcarousel'
   defaults:
-    _form: '\Drupal\jcarousel\Form\jcarouselConfig'
+    _form: '\Drupal\jcarousel\Form\JCarouselConfig'
     _title: 'jCarousel configuration'
   requirements:
     _permission: 'administer jcarousel'
