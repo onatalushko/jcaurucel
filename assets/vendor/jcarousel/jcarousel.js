@@ -99,6 +99,7 @@
    */
   Drupal.jcarousel.attachAjaxPreload = function (element, event) {
     var preload_page = element.data('preload-page') || false;
+    var ajax_path = element.data('ajax-path') || 'jcarousel/views/ajax';
     var classes  = element.closest('[class*="js-view-dom-id-"]').attr('class');
     var views_id = classes.split(' ').filter(function(element){
       return element.split('js-view-dom-id-').length == 2;
@@ -117,7 +118,7 @@
     );
 
     var  element_settings = {
-      url: drupalSettings.path.baseUrl + 'jcarousel/views/ajax',
+      url: drupalSettings.path.baseUrl + ajax_path,
       base: views_dom_id,
       event: event,
       progress: {
@@ -178,7 +179,6 @@
     console.log('progress');
     console.log(this);
     var jCarousel = $(this.element_settings.selector).find('[data-jcarousel]');
-    console.log(jCarousel.jcarousel('items').size());
     this.progress.element = $('<li><div class="ajax-progress ajax-progress-throbber ajax-progress-jcarousel"><div class="throbber">&nbsp;</div></div></li>');
     jCarousel.jcarousel('list').append(this.progress.element);
     jCarousel.jcarousel('reload');
@@ -262,6 +262,7 @@
 
     // Reload jCarousel and scroll it forward.
     jCarousel.jcarousel('reload');
+    // @todo get scroll count from carousel settings.
     jCarousel.jcarousel('scroll', '+=1');
 
     if (isNaN(ajax.element_settings.submit.page)) {
@@ -269,10 +270,7 @@
     }
     else {
       if (response.settings.next_page == null) {
-        console.dir(jCarousel.data('events'));
         jCarousel.removeAttr('data-preload-page');
-        // jCarousel.off('jcarousel:last');
-        console.dir(jCarousel.data('events'));
       }
       else {
         ajax.element_settings.submit.page = response.settings.next_page;

@@ -2,12 +2,9 @@
 
 /**
  * @file
- * Contains \Drupal\views\Plugin\views\pager\Full.
+ * Contains \Drupal\views\Plugin\views\pager\jcarouselPager.
  */
 namespace Drupal\jcarousel\Plugin\views\pager;
-use Drupal\Core\Form\FormStateInterface;
-use Drupal\views\Plugin\views\pager\Full;
-use Drupal\views\Plugin\views\pager\PagerPluginBase;
 use Drupal\views\Plugin\views\pager\SqlBase;
 
 /**
@@ -17,7 +14,7 @@ use Drupal\views\Plugin\views\pager\SqlBase;
  *
  * @ViewsPager(
  *   id = "jcarousel_pager",
- *   title = @Translation("jCarousel"),
+ *   title = @Translation("jCarousel (Please use for preload with Ajax enabled views)"),
  *   short_title = @Translation("jCarousel"),
  *   help = @Translation("Paged output, jCarousel style"),
  *   theme = "jcarousel_pager",
@@ -81,24 +78,6 @@ class jcarouselPager extends SqlBase {
   /**
    * {@inheritdoc}
    */
-  public function render($input) {
-//    // The 0, 1, 3, 4 indexes are correct. See the template_preprocess_pager()
-//    // documentation.
-//    $tags = array(
-//      0 => $this->options['tags']['first'],
-//      1 => $this->options['tags']['previous'],
-//      3 => $this->options['tags']['next'],
-//      4 => $this->options['tags']['last'],
-//    );
-//    return array(
-//      '#theme' => $this->themeFunctions(),
-//      '#tags' => $tags,
-//      '#element' => $this->options['id'],
-//      '#parameters' => $input,
-//      '#quantity' => $this->options['quantity'],
-//      '#route_name' => !empty($this->view->live_preview) ? '<current>' : '<none>',
-//    );
-  }
-
+  public function render($input) {}
 
 }

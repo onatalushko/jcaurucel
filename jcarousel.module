@@ -58,7 +58,7 @@ function jcarousel_help($route_name, RouteMatchInterface $route_match) {
         'responsive' => TRUE,
         'events' => [
           'jcarousel' => [
-//            'jcarousel:create' => 'jcarousel.createCarousel',
+            'jcarousel:create' => 'jcarousel.createCarousel',
           ],
         ],
       ];
@@ -112,7 +112,9 @@ function jcarousel_help($route_name, RouteMatchInterface $route_match) {
       $jcourusel = [
         '#theme' => 'jcarousel',
         '#items' => $item_lists,
-        '#options' => ['vertical' => true],
+        '#options' => [
+          'vertical' => TRUE,
+        ],
       ];
       $output .= $renderer->render($jcourusel);
 
@@ -333,38 +335,17 @@ function jcarousel_theme() {
  *   An array of JS and CSS files, suitable for inclusion as an #attached array.
  */
 function jcarousel_add($options = []) {
-  static $library_added;
-
   // Add the jCarousel library and any global settings.
   $attachments['library'][] = 'jcarousel/jcarousel';
 
-//  if (isset($class_name)) {
-    // Set default options.
   $options += [
     'skin' => 'default',
   ];
   $attachments['library'][] = 'jcarousel/skin.' . $options['skin'];
 
 
-    // Allow other modules to modify these settings.
-    \Drupal::moduleHandler()->alter('jcarousel_options', $options, $class_name);
-
-//    // Add settings for this individual carousel.
-//    if (!isset($library_added[$class_name]) || !$add) {
-//      $library_added[$class_name] = TRUE;
-//
-//      // Add the JavaScript settings for this carousel.
-//      $js_settings = [
-//        'jcarousel' => [
-//          'carousels' => [
-//            $class_name => $options,
-//          ],
-//        ],
-//      ];
-//
-//      $attachments['drupalSettings'] = $js_settings;
-//    }
-//  }
+  // Allow other modules to modify these settings.
+  \Drupal::moduleHandler()->alter('jcarousel_options', $options, $class_name);
 
   return $attachments;
 }
@@ -415,27 +396,6 @@ function template_preprocess_jcarousel(&$variables) {
     $variables['#attached']['library'][] = 'jcarousel/skin.' . $options['skin'];
   }
 
-
-//    // Add settings for this individual carousel.
-//    if (!isset($library_added[$class_name]) || !$add) {
-//      $library_added[$class_name] = TRUE;
-//
-//      // Add the JavaScript settings for this carousel.
-//      $js_settings = [
-//        'jcarousel' => [
-//          'carousels' => [
-//            $class_name => $options,
-//          ],
-//        ],
-//      ];
-//
-//      $attachments['drupalSettings'] = $js_settings;
-//    }
-//    NestedArray::mergeDeep($view->element['#attached'], $attachments);
-
-//  $settings = $attachments['drupalSettings']['jcarousel']['carousels'];
-//  $key = key($settings);
-
   $variables['options'] = $options;
   unset($variables['attributes']);
   $variables += _jcarousel_generate_attributes($variables['items'], $variables['options']);
@@ -464,7 +424,7 @@ function template_preprocess_views_view_jcarousel(&$variables) {
       }
       $variables['options']['ajax'] = TRUE;
       if (empty($variables['options']['ajax_path'])) {
-        $variables['options']['ajax_path'] = 'jcarousel/views/ajax?_wrapper_format=drupal_ajax';
+        $variables['options']['ajax_path'] = 'jcarousel/views/ajax';
       }
     }
   }
@@ -497,7 +457,7 @@ function _jcarousel_generate_attributes($items, $options) {
   $attributes['attributes']->addClass('jcarousel');
   $attributes['attributes']->setAttribute('data-jcarousel', 'true');
 
-  // scroll all visible elements at a time if scroll = 'auto'
+  // Scroll all visible elements at a time if scroll = 'auto'
   $scroll = !empty($options['scroll']) ? $options['scroll'] : $options['visible'];
 
   if ($options['auto'] > 0 && $options['autoPause'] && empty($options['events']['jcarousel']['jcarousel:createend'])) {
@@ -598,9 +558,5 @@ function jcarousel_page_attachments(&$page) {
       $variables['#attached']['library'][] = 'jcarousel/skin.' . $id;
     }
 
-    $js_settings = [
-//    'ajaxPath' => Url::fromRoute('jcarousel.ajax.views')->toString(),
-    ];
-    $page['#attached']['drupalSettings']['jcarousel'] = $js_settings;
   }
 }
