@@ -524,6 +524,9 @@ function _jcarousel_generate_attributes($items, $options) {
   if ($options['ajax']) {
     $attributes['attributes']->setAttribute('data-ajax', 'true');
     $attributes['attributes']->setAttribute('data-ajax-path', $options['ajax_path']);
+    if ($options['preload_page'] != 0) {
+      $attributes['attributes']->setAttribute('data-preload-page', $options['preload_page']);
+    }
   }
 
   if ($options['vertical']) {
@@ -552,9 +555,7 @@ function _jcarousel_generate_attributes($items, $options) {
   $attributes['attributes_previous']->addClass('jcarousel-control-prev');
 
   $attributes['attributes_next']->setAttribute('data-jcarousel-control', 'true');
-  if ($options['preload_page'] != 0) {
-    $attributes['attributes_next']->setAttribute('data-preload-page', $options['preload_page']);
-  }
+
   if (!empty($options['events']['jcarouselcontrol'])) {
     $attributes['attributes_next']->setAttribute('data-events', Json::encode($options['events']['jcarouselcontrol']));
   }

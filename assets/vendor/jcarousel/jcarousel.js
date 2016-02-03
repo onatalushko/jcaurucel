@@ -27,6 +27,29 @@
         var instance = $(this).jcarousel(options);
         Drupal.jcarousel.attachEvents(events, instance);
 
+        if ($(instance).closest('[class*="js-view-dom-id-"]').length > 0) {
+          // Preload next page.
+          var preload_page = $(instance).data('preload-page') || false;
+          if (preload_page) {
+            Drupal.jcarousel.attachAjaxPreload($(instance), 'jcarousel:last');
+          }
+
+          instance.on('jcarousel:scroll', function(event, carousel) {
+            // Trigger jcarousel:last to force ajax page preload.
+            var last = carousel.last();
+            var lastIndex  = carousel.index(last);
+            var total      = carousel.items().length;
+            if (lastIndex == (total - 1)) {
+              var preload_page = $(this).attr('data-preload-page') || false;
+              if (preload_page) {
+                event.preventDefault();
+                $(this).trigger('jcarousel:last');
+              }
+            }
+          });
+
+        }
+
         // Init autoscroll plugin if any autoscroll option available.
         if (Object.getOwnPropertyNames(autoscroll_options).length > 0) {
           instance.jcarouselAutoscroll(autoscroll_options);
@@ -40,41 +63,6 @@
           delete options.events;
           var control = $(this).jcarouselControl(options);
 
-          if ($(control).closest('[class*="js-view-dom-id-"]').length > 0) {
-            // Preload next page.
-            var preload_page = $(this).data('preload-page') || false;
-            if ($(this).hasClass('jcarousel-control-next') && preload_page) {
-              var classes  = $(this).closest('[class*="js-view-dom-id-"]').attr('class');
-              var views_id = classes.split(' ').filter(function(element){
-                return element.split('js-view-dom-id-').length == 2;
-              });
-
-              var views_dom_id = '';
-              if (views_id.length == 1) {
-                views_dom_id = 'views_dom_id:' + views_id[0].split('js-view-dom-id-')[1];
-              }
-
-              var viewData = drupalSettings.views.ajaxViews[views_dom_id] || {};
-              var pager = {page : preload_page};
-              $.extend(
-                viewData,
-                pager
-              );
-
-              var  element_settings = {
-                url: drupalSettings.path.baseUrl + 'jcarousel/views/ajax',
-                base: views_dom_id,
-                event: 'jcarouselcontrol:inactive',
-                progress: {
-                  type: 'jcarousel'
-                },
-                submit: viewData,
-                element: this
-              };
-
-              Drupal.ajax(element_settings);
-            }
-          }
           Drupal.jcarousel.attachEvents(events, control);
         });
 
@@ -99,6 +87,47 @@
         element.on(ev, Drupal[behavior[0]][behavior[1]](event, element));
       }
     }
+  };
+
+  /**
+   * Attach ajax preload.
+   *
+   * @param element
+   *   jQuery element ajax preload attached to.
+   * @param event
+   *   Event name.
+   */
+  Drupal.jcarousel.attachAjaxPreload = function (element, event) {
+    var preload_page = element.data('preload-page') || false;
+    var classes  = element.closest('[class*="js-view-dom-id-"]').attr('class');
+    var views_id = classes.split(' ').filter(function(element){
+      return element.split('js-view-dom-id-').length == 2;
+    });
+
+    var views_dom_id = '';
+    if (views_id.length == 1) {
+      views_dom_id = 'views_dom_id:' + views_id[0].split('js-view-dom-id-')[1];
+    }
+
+    var viewData = drupalSettings.views.ajaxViews[views_dom_id] || {};
+    var pager = {page : preload_page};
+    $.extend(
+      viewData,
+      pager
+    );
+
+    var  element_settings = {
+      url: drupalSettings.path.baseUrl + 'jcarousel/views/ajax',
+      base: views_dom_id,
+      event: event,
+      progress: {
+        type: 'jcarousel'
+      },
+      submit: viewData,
+      element: element
+    };
+
+    Drupal.ajax(element_settings);
   };
 
   Drupal.jcarousel.reloadCallback = function (event, carousel) {
@@ -177,8 +206,9 @@
     var wrapper = response.selector ? $(response.selector + ' .jcarousel-wrapper') : $(ajax.wrapper + ' .jcarousel-wrapper');
     var slide_parent = wrapper.find('ul');
     var jCarousel = wrapper.find('[data-jcarousel]');
-    var control = $(ajax.element);
-    var control_options = control.jcarouselControl('options');
+    var jCarouselOptions = jCarousel.jcarousel('options');
+//    var control = $(ajax.element);
+//    var control_options = control.jcarouselControl('options');
     var method = response.method || ajax.method;
     var effect = ajax.getEffect(response);
     var settings;
@@ -232,13 +262,17 @@
 
     // Reload jCarousel and scroll it forward.
     jCarousel.jcarousel('reload');
+    jCarousel.jcarousel('scroll', '+=1');
 
     if (isNaN(ajax.element_settings.submit.page)) {
       ajax.element_settings.submit.page = 1;
     }
     else {
       if (response.settings.next_page == null) {
-        control.off('jcarouselcontrol:inactive');
+        console.dir(jCarousel.data('events'));
+        jCarousel.removeAttr('data-preload-page');
+        // jCarousel.off('jcarousel:last');
+        console.dir(jCarousel.data('events'));
       }
       else {
         ajax.element_settings.submit.page = response.settings.next_page;
