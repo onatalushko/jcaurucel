@@ -322,7 +322,7 @@ function _jcarousel_help_events() {
   $build[] = [
     '#type' => 'html_tag',
     '#tag' => 'p',
-    '#value' => t('You can attach jCarousel events handlers via settings
+    '#value' => t('You can attach jCarousel and jCarousel plugins events handlers via settings
       using \'events\' property. Property structure are following: <code> <pre>
       $options = [
         \'events\' => [
