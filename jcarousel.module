@@ -693,8 +693,7 @@ function _jcarousel_generate_attributes($items, $options) {
  * Implements hook_page_attachments().
  */
 function jcarousel_page_attachments(&$page) {
-  $jcarousel_global_load = \Drupal::config('jcarousel.settings')->get('global_load');
-  if ($jcarousel_global_load) {
+  if (\Drupal::config('jcarousel.settings')->get('global_load')) {
     $options = [
       'skin' => 'default',
       'scroll' => 1,
@@ -712,6 +711,5 @@ function jcarousel_page_attachments(&$page) {
     foreach ($skins as $id => $skin) {
       $variables['#attached']['library'][] = 'jcarousel/skin.' . $id;
     }
-
   }
 }
