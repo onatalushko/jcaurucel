@@ -693,23 +693,26 @@ function _jcarousel_generate_attributes($items, $options) {
  * Implements hook_page_attachments().
  */
 function jcarousel_page_attachments(&$page) {
-  if (\Drupal::config('jcarousel.settings')->get('global_load')) {
-    $options = [
-      'skin' => 'default',
-      'scroll' => 1,
-      'vertical' => 0,
-      'navigation' => 'after',
-    ];
-    // Add the jCarousel library and any global settings.
-    $page['#attached']['library'][] = 'jcarousel/jcarousel';
+  if (!\Drupal::config('jcarousel.settings')->get('global_load')) {
+    return;
+  }
 
-    // Allow other modules to modify these settings.
-    \Drupal::moduleHandler()->alter('jcarousel_options', $options, $class_name);
+  $options = [
+    'skin' => 'default',
+    'scroll' => 1,
+    'vertical' => 0,
+    'navigation' => 'after',
+  ];
 
-    $skins = \Drupal::service('jcarousel.skins.manager')->getDefinitions();
+  // Add the jCarousel library and any global settings.
+  $page['#attached']['library'][] = 'jcarousel/jcarousel';
 
-    foreach ($skins as $id => $skin) {
-      $variables['#attached']['library'][] = 'jcarousel/skin.' . $id;
-    }
+  // Allow other modules to modify these settings.
+  \Drupal::moduleHandler()->alter('jcarousel_options', $options, $class_name);
+
+  $skins = \Drupal::service('jcarousel.skins.manager')->getDefinitions();
+
+  foreach ($skins as $id => $skin) {
+    $variables['#attached']['library'][] = 'jcarousel/skin.' . $id;
   }
 }
