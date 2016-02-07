@@ -12,9 +12,6 @@
  * @ingroup themeable
  */
 #}
-{#{{ dump(options) }}#}
-{#{{ dump(attributes_wrapper) }}#}
-{#{{ dump(attributes) }}#}
 <div{{ attributes_wrapper }}>
   {% if options.navigation == 'before' %}
     <a{{ attributes_previous }}  href="#"></a>
@@ -34,4 +31,3 @@
     <a{{ attributes_next }} href="#"></a>
   {% endif %}
 </div>
-
