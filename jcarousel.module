@@ -632,11 +632,11 @@ function _jcarousel_generate_attributes($items, $options) {
     $attributes['attributes']->setAttribute('data-events', Json::encode($options['events']['jcarousel']));
   }
 
-  if ($options['wrap']) {
+  if (isset($options['wrap'])) {
     $attributes['attributes']->setAttribute('data-wrap', $options['wrap']);
   }
 
-  if ($options['ajax']) {
+  if (isset($options['ajax']) && $options['ajax']) {
     $attributes['attributes']->setAttribute('data-ajax', 'true');
     $attributes['attributes']->setAttribute('data-ajax-path', $options['ajax_path']);
     if ($options['preload_page'] != 0) {
@@ -644,7 +644,7 @@ function _jcarousel_generate_attributes($items, $options) {
     }
   }
 
-  if ($options['vertical']) {
+  if (isset($options['vertical']) && $options['vertical']) {
     $attributes['attributes']->setAttribute('data-vertical', 'true');
   }
 
