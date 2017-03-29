@@ -84,7 +84,7 @@
     for (var ev in events) {
       var behavior = events[ev].split('.');
       if ($.isFunction(Drupal[behavior[0]][behavior[1]])) {
-        element.on(ev, Drupal[behavior[0]][behavior[1]](event, element));
+        element.on(ev, Drupal[behavior[0]][behavior[1]](ev, element));
       }
     }
   };
